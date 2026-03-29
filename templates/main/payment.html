@@ -1,0 +1,960 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Secure Checkout — FinSmart{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  STYLES                                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<style>
+    /* ── Reset / Page ───────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pg-page {
+        min-height: 100vh;
+        background: #f0edf8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Card shell ─────────────────────────────────────────────── */
+    .pg-card {
+        width: 100%;
+        max-width: 450px;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 24px 64px rgba(123, 44, 191, .15), 0 4px 16px rgba(0, 0, 0, .06);
+        overflow: hidden;
+    }
+
+    /* ── Purple header bar ──────────────────────────────────────── */
+    .pg-header {
+        background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%);
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+    }
+
+    .pg-header svg {
+        flex-shrink: 0;
+    }
+
+    .pg-header-title {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .pg-ssl {
+        margin-left: auto;
+        background: rgba(255, 255, 255, .18);
+        border: 1px solid rgba(255, 255, 255, .3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ── Body ───────────────────────────────────────────────────── */
+    .pg-body {
+        padding: 28px 28px 24px;
+    }
+
+    @media (max-width: 420px) {
+        .pg-body {
+            padding: 20px 16px;
+        }
+    }
+
+    /* ── Order summary strip ────────────────────────────────────── */
+    .pg-summary {
+        background: #f9f6ff;
+        border: 1px solid #e5d8f8;
+        border-radius: 12px;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pg-order-tag {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #9d4edd;
+        margin-bottom: 4px;
+    }
+
+    .pg-order-customer {
+        font-size: 14px;
+        font-weight: 600;
+        color: #3d2060;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pg-order-amount {
+        text-align: right;
+    }
+
+    .pg-order-amount .pg-lbl {
+        font-size: 11px;
+        color: #9d4edd;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 2px;
+    }
+
+    .pg-order-amount .pg-val {
+        font-size: 24px;
+        font-weight: 900;
+        color: #3d2060;
+        line-height: 1;
+    }
+
+    .pg-order-amount .pg-val span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #9d4edd;
+    }
+
+    /* ── Divider ────────────────────────────────────────────────── */
+    .pg-sep {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #c3aee8;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 20px;
+    }
+
+    .pg-sep::before,
+    .pg-sep::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #ede6f8;
+    }
+
+    /* ── Form fields ────────────────────────────────────────────── */
+    .pg-field {
+        margin-bottom: 16px;
+    }
+
+    .pg-field label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #7b2cbf;
+        margin-bottom: 6px;
+    }
+
+    .pg-hint {
+        width: 15px;
+        height: 15px;
+        background: #ede6f8;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 800;
+        color: #9d4edd;
+        cursor: help;
+        margin-left: 2px;
+    }
+
+    .pg-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .pg-input-icon {
+        position: absolute;
+        left: 12px;
+        color: #c3aee8;
+        pointer-events: none;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .pg-field input {
+        width: 100%;
+        padding: 13px 14px 13px 40px;
+        border: 1.5px solid #e0d0f5;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #2d1a50;
+        background: #faf8ff;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .pg-field input::placeholder {
+        color: #cfc1e8;
+    }
+
+    .pg-field input:focus {
+        border-color: #7b2cbf;
+        box-shadow: 0 0 0 3px rgba(123, 44, 191, .12);
+        background: #fff;
+    }
+
+    .pg-card-brand {
+        position: absolute;
+        right: 12px;
+        font-size: 12px;
+        font-weight: 800;
+        font-style: italic;
+        color: #7b2cbf;
+        pointer-events: none;
+        min-width: 34px;
+        text-align: right;
+    }
+
+    /* ── Two-column row ─────────────────────────────────────────── */
+    .pg-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    @media (max-width: 360px) {
+        .pg-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Pay button ─────────────────────────────────────────────── */
+    .pg-pay-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 16px;
+        background: #2ecc71;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        letter-spacing: .3px;
+        transition: background .2s, transform .15s, box-shadow .2s;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, .35);
+    }
+
+    .pg-pay-btn:hover:not(:disabled) {
+        background: #27ae60;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(46, 204, 113, .45);
+    }
+
+    .pg-pay-btn:active {
+        transform: translateY(0);
+    }
+
+    .pg-pay-btn:disabled {
+        opacity: .75;
+        cursor: not-allowed;
+    }
+
+    /* ── Spinner ────────────────────────────────────────────────── */
+    @keyframes pg-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .pg-spinner {
+        width: 18px;
+        height: 18px;
+        border: 2.5px solid rgba(255, 255, 255, .35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: pg-spin .7s linear infinite;
+        flex-shrink: 0;
+    }
+
+    /* ── Brand logos ────────────────────────────────────────────── */
+    .pg-brands {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #f0e8ff;
+        flex-wrap: wrap;
+    }
+
+    .pg-brand-text {
+        font-size: 13px;
+        font-weight: 800;
+        font-style: italic;
+        color: #bbb;
+        letter-spacing: .5px;
+    }
+
+    .pg-badge {
+        font-size: 10px;
+        font-weight: 700;
+        color: #bbb;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /*  SUCCESS SCREEN                                              */
+    /* ═══════════════════════════════════════════════════════════ */
+    #pg-success {
+        display: none;
+        opacity: 0;
+        transition: opacity .5s ease;
+    }
+
+    #pg-success.pg-visible {
+        display: block;
+        opacity: 1;
+    }
+
+    @keyframes pg-fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #pg-success.pg-anim {
+        animation: pg-fade-in .55s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    /* Check circle */
+    .pg-check-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 32px 0 20px;
+    }
+
+    @keyframes pg-pop {
+        0% {
+            transform: scale(.4);
+            opacity: 0;
+        }
+
+        70% {
+            transform: scale(1.12);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .pg-check-circle {
+        width: 90px;
+        height: 90px;
+        background: #2ecc71;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(46, 204, 113, .4);
+        animation: pg-pop .5s cubic-bezier(.22, 1, .36, 1) .1s forwards;
+        opacity: 0;
+    }
+
+    .pg-check-circle svg {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Success text */
+    .pg-success-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 800;
+        color: #2d1a50;
+        padding: 0 28px;
+        line-height: 1.35;
+        margin-bottom: 24px;
+    }
+
+    /* Details list */
+    .pg-details {
+        background: #f9f6ff;
+        border: 1px solid #e5d8f8;
+        border-radius: 12px;
+        margin: 0 28px 24px;
+        overflow: hidden;
+    }
+
+    .pg-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 18px;
+        font-size: 14px;
+        border-bottom: 1px solid #ede6f8;
+    }
+
+    .pg-detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .pg-detail-label {
+        color: #9d4edd;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .pg-detail-value {
+        color: #2d1a50;
+        font-weight: 700;
+        font-size: 14px;
+        text-align: right;
+    }
+
+    .pg-detail-value.pg-amount {
+        font-size: 18px;
+        font-weight: 900;
+        color: #7b2cbf;
+    }
+
+    /* Action buttons */
+    .pg-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0 28px 28px;
+    }
+
+    .pg-btn-outline {
+        width: 100%;
+        padding: 14px 20px;
+        border: 2px solid #7b2cbf;
+        background: transparent;
+        border-radius: 12px;
+        color: #7b2cbf;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        text-decoration: none;
+        transition: background .2s, color .2s, transform .15s;
+        letter-spacing: .2px;
+    }
+
+    .pg-btn-outline:hover {
+        background: #7b2cbf;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .pg-btn-outline svg {
+        flex-shrink: 0;
+    }
+
+    /* ── Confirm-to-learning button (green, filled) ─────────── */
+    .pg-btn-confirm {
+        background: #2ecc71;
+        border-color: #2ecc71;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, .35);
+    }
+
+    .pg-btn-confirm:hover {
+        background: #27ae60;
+        border-color: #27ae60;
+        color: #fff;
+        box-shadow: 0 10px 28px rgba(46, 204, 113, .45);
+        transform: translateY(-2px);
+    }
+
+    /* Footer */
+    .pg-footer {
+        border-top: 1px solid #f0e8ff;
+        padding: 14px 28px;
+        text-align: center;
+    }
+
+    .pg-footer p {
+        font-size: 12px;
+        color: #b0a0c8;
+        margin-bottom: 6px;
+    }
+
+    .pg-footer-logos {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .pg-footer-logo {
+        font-size: 12px;
+        font-weight: 800;
+        font-style: italic;
+        color: #ccc;
+        letter-spacing: .3px;
+    }
+
+    .pg-footer-badge {
+        font-size: 10px;
+        font-weight: 700;
+        color: #ccc;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        border: 1px solid #ddd;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  MARKUP                                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="pg-page">
+    <div class="pg-card">
+
+        <!-- Purple header (shared) -->
+        <div class="pg-header">
+            <!-- Lock icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span class="pg-header-title">Secure Payment</span>
+            <!-- SSL badge -->
+            <div class="pg-ssl">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+                SSL
+            </div>
+        </div>
+
+        <!-- ─────────────────────────────────── FORM STATE ── -->
+        <div id="pg-form-wrap">
+            <div class="pg-body">
+
+                <!-- Order summary -->
+                <div class="pg-summary">
+                    <div>
+                        <div class="pg-order-tag">Order #FIN-2026</div>
+                        <div class="pg-order-customer">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            {{ user.get_full_name|default:user.username }}
+                        </div>
+                    </div>
+                    <div class="pg-order-amount">
+                        <div class="pg-lbl">До оплати</div>
+                        <div class="pg-val">{{ total_price|floatformat:2 }} <span>UAH</span></div>
+                    </div>
+                </div>
+
+                <!-- Separator -->
+                <div class="pg-sep">Введіть дані картки</div>
+
+                <!-- Form -->
+                <form id="pg-form" method="POST" action="{% url 'process_payment' %}" autocomplete="off">
+                    {% csrf_token %}
+
+                    <!-- Card Number -->
+                    <div class="pg-field">
+                        <label for="pg-cardnum">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2" />
+                                <line x1="1" y1="10" x2="23" y2="10" />
+                            </svg>
+                            Номер картки
+                        </label>
+                        <div class="pg-input-wrap">
+                            <span class="pg-input-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" />
+                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                </svg>
+                            </span>
+                            <input id="pg-cardnum" name="card_number" type="text" inputmode="numeric"
+                                placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number" required>
+                            <span class="pg-card-brand" id="pg-brand"></span>
+                        </div>
+                    </div>
+
+                    <!-- Expiry + CVV -->
+                    <div class="pg-row">
+                        <div class="pg-field">
+                            <label for="pg-expiry">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                Термін дії
+                            </label>
+                            <div class="pg-input-wrap">
+                                <span class="pg-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                </span>
+                                <input id="pg-expiry" name="expiry" type="text" inputmode="numeric"
+                                    placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" required>
+                            </div>
+                        </div>
+                        <div class="pg-field">
+                            <label for="pg-cvv">
+                                CVV
+                                <span class="pg-hint" title="3-значний код на звороті картки">?</span>
+                            </label>
+                            <div class="pg-input-wrap">
+                                <span class="pg-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="7" width="20" height="14" rx="2" />
+                                        <path d="M16 7V5a2 2 0 0 0-4 0v2" />
+                                    </svg>
+                                </span>
+                                <input id="pg-cvv" name="cvv" type="password" inputmode="numeric" placeholder="•••"
+                                    maxlength="4" autocomplete="cc-csc" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cardholder -->
+                    <div class="pg-field">
+                        <label for="pg-holder">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            Власник картки
+                        </label>
+                        <div class="pg-input-wrap">
+                            <span class="pg-input-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </span>
+                            <input id="pg-holder" name="cardholder" type="text" placeholder="IVAN PETRENKO"
+                                autocomplete="cc-name" style="text-transform:uppercase;" required>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="pg-field">
+                        <label for="pg-email">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            Email для квитанції
+                        </label>
+                        <div class="pg-input-wrap">
+                            <span class="pg-input-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                            </span>
+                            <input id="pg-email" name="email" type="email" placeholder="your@email.com"
+                                value="{{ user.email }}" autocomplete="email" required>
+                        </div>
+                    </div>
+
+                    <!-- Pay button -->
+                    <button type="button" id="pg-pay-btn" class="pg-pay-btn" onclick="pgHandlePay()">
+                        <svg id="pg-btn-lock" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span id="pg-btn-text">Сплатити {{ total_price|floatformat:2 }} UAH</span>
+                    </button>
+                </form>
+
+                <!-- Logos -->
+                <div class="pg-brands">
+                    <span class="pg-brand-text">VISA</span>
+                    <span class="pg-brand-text" style="font-size:14px;">Mastercard</span>
+                    <span class="pg-badge">PCI DSS</span>
+                    <span class="pg-badge">3D Secure</span>
+                </div>
+
+            </div><!-- /pg-body -->
+        </div><!-- /#pg-form-wrap -->
+
+        <!-- ─────────────────────────────────── SUCCESS STATE ── -->
+        <div id="pg-success">
+
+            <!-- Check icon -->
+            <div class="pg-check-wrap">
+                <div class="pg-check-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <p class="pg-success-title">
+                Дякуємо!<br>Платіж успішно відправлено
+            </p>
+
+            <!-- Details -->
+            <div class="pg-details">
+                <div class="pg-detail-row">
+                    <span class="pg-detail-label">ID</span>
+                    <span class="pg-detail-value" id="pg-order-id">—</span>
+                </div>
+                <div class="pg-detail-row">
+                    <span class="pg-detail-label">Дата</span>
+                    <span class="pg-detail-value" id="pg-date">—</span>
+                </div>
+                <div class="pg-detail-row">
+                    <span class="pg-detail-label">Сума</span>
+                    <span class="pg-detail-value pg-amount">{{ total_price|floatformat:2 }} UAH</span>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="pg-actions">
+
+                <!-- Confirm & go to learning — triggers Django view to enroll + clear cart -->
+                <a id="pg-confirm-btn" href="{% url 'payment_success' %}" class="pg-btn-outline pg-btn-confirm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Підтвердити та перейти до навчання
+                </a>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="pg-footer">
+                <p>Підтримка: 0 800 501 000 (безкоштовно) · support@finsmart.ua</p>
+                <div class="pg-footer-logos">
+                    <span class="pg-footer-logo">VISA</span>
+                    <span class="pg-footer-logo">Mastercard</span>
+                    <span class="pg-footer-badge">PCI DSS</span>
+                    <span class="pg-footer-badge">3D Secure</span>
+                </div>
+            </div>
+
+        </div><!-- /#pg-success -->
+
+    </div><!-- /.pg-card -->
+</div><!-- /.pg-page -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+    (function () {
+        'use strict';
+
+        /* ── Card number masking + brand detection ── */
+        var BRANDS = [
+            { re: /^4/, label: 'VISA' },
+            { re: /^5[1-5]/, label: 'MC' },
+            { re: /^3[47]/, label: 'AMEX' },
+            { re: /^220[0-4]/, label: 'МИР' },
+        ];
+
+        function detectBrand(d) {
+            for (var i = 0; i < BRANDS.length; i++) {
+                if (BRANDS[i].re.test(d)) return BRANDS[i].label;
+            }
+            return '';
+        }
+
+        var cardInput = document.getElementById('pg-cardnum');
+        var brandEl = document.getElementById('pg-brand');
+
+        cardInput.addEventListener('input', function () {
+            var digits = this.value.replace(/\D/g, '').slice(0, 16);
+            this.value = digits.replace(/(.{4})/g, '$1 ').trim();
+            brandEl.textContent = detectBrand(digits);
+        });
+
+        /* ── Expiry masking ── */
+        var expiryInput = document.getElementById('pg-expiry');
+        expiryInput.addEventListener('input', function () {
+            var v = this.value.replace(/\D/g, '').slice(0, 4);
+            if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
+            this.value = v;
+        });
+
+        /* ── Cardholder uppercase ── */
+        var holderInput = document.getElementById('pg-holder');
+        holderInput.addEventListener('input', function () {
+            var pos = this.selectionStart;
+            this.value = this.value.toUpperCase();
+            this.setSelectionRange(pos, pos);
+        });
+
+        /* ── Generate Order ID ── */
+        function randomOrderId() {
+            return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        }
+
+        /* ── Format date Ukrainian style ── */
+        function formatDate(d) {
+            var dd = String(d.getDate()).padStart(2, '0');
+            var mm = String(d.getMonth() + 1).padStart(2, '0');
+            var yyyy = d.getFullYear();
+            var hh = String(d.getHours()).padStart(2, '0');
+            var min = String(d.getMinutes()).padStart(2, '0');
+            return dd + '.' + mm + '.' + yyyy + ' ' + hh + ':' + min;
+        }
+
+        /* ── Download receipt (mock) ── */
+        window.pgDownloadReceipt = function () {
+            var orderId = document.getElementById('pg-order-id').textContent;
+            var date = document.getElementById('pg-date').textContent;
+            var amount = document.querySelector('.pg-amount').textContent;
+
+            var content = [
+                '====================================',
+                '       FinSmart — Квитанція          ',
+                '====================================',
+                'ID замовлення : ' + orderId,
+                'Дата          : ' + date,
+                'Сума          : ' + amount,
+                'Статус        : Оплачено ✔',
+                '====================================',
+                'Дякуємо за оплату!',
+            ].join('\n');
+
+            var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'receipt_' + orderId + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        /* ── Main pay handler ── */
+        window.pgHandlePay = function () {
+            var form = document.getElementById('pg-form');
+            if (!form.checkValidity()) { form.reportValidity(); return; }
+
+            var btn = document.getElementById('pg-pay-btn');
+            var btnTxt = document.getElementById('pg-btn-text');
+            var btnLck = document.getElementById('pg-btn-lock');
+
+            /* -- Processing state */
+            btn.disabled = true;
+            btnLck.style.display = 'none';
+            var spinner = document.createElement('span');
+            spinner.className = 'pg-spinner';
+            btn.insertBefore(spinner, btnTxt);
+            btnTxt.textContent = 'Обробка...';
+
+            /* -- After 2s show success */
+            setTimeout(function () {
+                /* Fill dynamic values */
+                document.getElementById('pg-order-id').textContent = randomOrderId();
+                document.getElementById('pg-date').textContent = formatDate(new Date());
+
+                /* Hide form, show success */
+                var formWrap = document.getElementById('pg-form-wrap');
+                var successEl = document.getElementById('pg-success');
+
+                formWrap.style.transition = 'opacity .3s ease';
+                formWrap.style.opacity = '0';
+
+                setTimeout(function () {
+                    formWrap.style.display = 'none';
+                    successEl.style.display = 'block';
+                    /* Force reflow for animation */
+                    void successEl.offsetWidth;
+                    successEl.classList.add('pg-anim');
+                    successEl.style.opacity = '1';
+                }, 300);
+
+            }, 2000);
+        };
+
+    })();
+</script>
+
+{% endblock %}

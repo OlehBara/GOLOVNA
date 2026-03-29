@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Сімейна група – FinSmart{% endblock %}
+
+{% block content %}
+<section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
+    <div style="max-width: 600px; width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h2 style="color: var(--text-primary); font-size: 24px; font-weight: 800; margin-bottom: 8px; text-align: center;">
+            👨‍👩‍👧‍👦 Моя сімейна група
+        </h2>
+        <p style="color: var(--text-secondary); text-align: center; margin-bottom: 32px; font-size: 14px; line-height: 1.6;">
+            Додайте до 3 учасників до сімейної підписки за їхнім email.
+        </p>
+
+        {% if family and family.members.all %}
+            <div style="margin-bottom: 28px;">
+                <h3 style="color: var(--text-primary); font-size: 16px; font-weight: 700; margin-bottom: 14px;">Учасники:</h3>
+                {% for member in family.members.all %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+                                {{ member.username|first|upper }}
+                            </div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: 600; font-size: 14px;">{{ member.username }}</div>
+                                <div style="color: var(--text-secondary); font-size: 12px;">{{ member.email }}</div>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'family_remove_member' member.id %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                                Видалити
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif family %}
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">
+                У вашій сім'ї поки що немає учасників.
+            </p>
+        {% else %}
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">
+                Сімейна група буде створена автоматично при додаванні першого учасника.
+            </p>
+        {% endif %}
+
+        {% if not family or family.members.count < 3 %}
+            <form method="post" style="margin-top: 16px;">
+                {% csrf_token %}
+                <label for="email" style="display: block; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                    Email нового учасника
+                </label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" name="email" id="email" placeholder="user@example.com" required
+                        style="flex: 1; padding: 12px 16px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-size: 14px;">
+                    <button type="submit" class="btn-primary" style="padding: 12px 24px; border-radius: 10px; white-space: nowrap;">
+                        Додати
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <p style="text-align: center; color: var(--text-muted); margin-top: 16px; font-size: 13px;">
+                Досягнуто максимум учасників (3).
+            </p>
+        {% endif %}
+
+        <div style="text-align: center; margin-top: 24px;">
+            <a href="{% url 'index' %}" style="color: var(--brand-primary); text-decoration: none; font-size: 14px;">
+                ← Повернутись на головну
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

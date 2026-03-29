@@ -1,0 +1,864 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} – FinSmart{% endblock %}
+
+{% block content %}
+
+{% if is_purchased %}
+
+<!-- ══════════════════════════════════════════════
+     LESSON DETAIL PAGE
+══════════════════════════════════════════════ -->
+<div class="ld-page" id="lessonRoot"
+    data-course-id="{{ lesson.course.id }}"
+    data-lesson-id="{{ lesson.id }}"
+    data-total-lessons="{{ total_lessons }}">
+
+    <!-- ── Breadcrumb ── -->
+    <div class="ld-breadcrumb">
+        <a href="{% url 'courses' %}">Курси</a>
+        <span class="ld-bc-sep">›</span>
+        <a href="{% url 'course_detail' lesson.course.id %}">{{ lesson.course.title }}</a>
+        <span class="ld-bc-sep">›</span>
+        <span>{{ lesson.title }}</span>
+    </div>
+
+    <!-- ── Lesson Title ── -->
+    <div class="ld-hero">
+        <span class="ld-label">Урок {{ lesson.order }}</span>
+        <h1 class="ld-title">{{ lesson.title }}</h1>
+        <p class="ld-meta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+            {{ lesson.duration|default:"~15 хв" }}
+            &nbsp;·&nbsp;
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            {{ lesson.course.title }}
+        </p>
+    </div>
+
+    <!-- ── Content wrapper ── -->
+    <div class="ld-content">
+
+        <!-- LAYOUT: sidebar + main content -->
+        <div class="ld-layout">
+            <!-- Sidebar with module lessons -->
+            <aside class="ld-sidebar">
+                <div class="ld-sidebar-header">
+                    <span class="ld-sidebar-label">Модуль {{ module_index }}</span>
+                    <h3 class="ld-sidebar-title">{{ lesson.course.title }}</h3>
+                </div>
+                <ul class="ld-lesson-list">
+                    {% for l in module_lessons %}
+                    <li class="ld-lesson-item {% if l.id == current_lesson_id %}active{% endif %}">
+                        <a href="{% url 'lesson_detail' l.id %}">
+                            <span class="ld-lesson-order">{{ l.order }}</span>
+                            <span class="ld-lesson-name">{{ l.title }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+
+            <!-- Main column -->
+            <div class="ld-main">
+
+                <!-- 1. VIDEO SECTION -->
+                {% if lesson.video_url %}
+                <section class="ld-section ld-video-section">
+                    <div class="ld-section-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7" />
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                        </svg>
+                        Відео-урок
+                    </div>
+                    <div class="ld-video-wrap">
+                        <iframe src="{{ lesson.video_url }}" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen title="{{ lesson.title }}"></iframe>
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- 2. LESSON CONTENT -->
+                <section class="ld-section ld-text-section">
+                    <div class="ld-section-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="17" y1="10" x2="3" y2="10" />
+                            <line x1="21" y1="6" x2="3" y2="6" />
+                            <line x1="21" y1="14" x2="3" y2="14" />
+                            <line x1="17" y1="18" x2="3" y2="18" />
+                        </svg>
+                        Матеріал уроку
+                    </div>
+                    <div class="ld-prose">
+                        {{ lesson.content|linebreaks }}
+                    </div>
+                </section>
+
+                <!-- 3. QUIZ SECTION -->
+                {% if lesson.quiz %}
+                <section class="ld-section ld-quiz-section">
+                    <div class="ld-section-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        Перевір себе
+                    </div>
+
+                    <div class="ld-quiz-card">
+                        <p class="ld-quiz-question">{{ lesson.quiz.question }}</p>
+
+                        <form id="quizForm" class="ld-quiz-form">
+                            {% csrf_token %}
+
+                            <label class="ld-option" id="opt-a">
+                                <input type="radio" name="answer" value="a">
+                                <span class="ld-option-letter">A</span>
+                                <span class="ld-option-text">{{ lesson.quiz.option_a }}</span>
+                            </label>
+
+                            <label class="ld-option" id="opt-b">
+                                <input type="radio" name="answer" value="b">
+                                <span class="ld-option-letter">B</span>
+                                <span class="ld-option-text">{{ lesson.quiz.option_b }}</span>
+                            </label>
+
+                            <label class="ld-option" id="opt-c">
+                                <input type="radio" name="answer" value="c">
+                                <span class="ld-option-letter">C</span>
+                                <span class="ld-option-text">{{ lesson.quiz.option_c }}</span>
+                            </label>
+
+                            <div class="ld-quiz-actions">
+                                <button type="button" id="checkBtn" class="ld-check-btn" onclick="checkAnswer()">
+                                    Перевірити відповідь
+                                </button>
+                                <button type="button" id="retryBtn" class="ld-retry-btn" onclick="resetQuiz()"
+                                    style="display:none;">
+                                    Спробувати знову
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Result message -->
+                        <div id="quizResult" class="ld-result" style="display:none;"></div>
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- 4. NAVIGATION -->
+                <div class="ld-nav-row">
+                    {% if prev_lesson %}
+                    <a href="{% url 'lesson_detail' prev_lesson.id %}" class="ld-nav-btn ld-nav-prev">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        <span>
+                            <small>Попередній урок</small>
+                            <strong>{{ prev_lesson.title }}</strong>
+                        </span>
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+
+                    {% if next_lesson %}
+                    <a href="{% url 'lesson_detail' next_lesson.id %}" class="ld-nav-btn ld-nav-next"
+                        id="nextLessonBtn" style="display:none;">
+                        <span>
+                            <small>Наступний урок</small>
+                            <strong>{{ next_lesson.title }}</strong>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'course_detail' lesson.course.id %}" class="ld-nav-btn ld-nav-next"
+                        id="nextLessonBtn" style="display:none;">
+                        <span>
+                            <small>Завершити</small>
+                            <strong>Повернутись до курсу</strong>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div><!-- /.ld-main -->
+        </div><!-- /.ld-layout -->
+
+    </div><!-- /.ld-content -->
+</div><!-- /.ld-page -->
+
+{% else %}
+<!-- ══ ACCESS DENIED STATE ══ -->
+<div class="ld-locked">
+    <div class="ld-locked-icon">🔒</div>
+    <h2>Доступ обмежено</h2>
+    <p>Цей урок доступний лише після придбання курсу.</p>
+    <a href="{% url 'course_detail' lesson.course.id %}" class="ld-locked-btn">
+        Переглянути курс
+    </a>
+</div>
+{% endif %}
+
+
+{# ════════════════════════════════════════════ CSS ════════════════════════════════════════════ #}
+<style>
+    :root {
+        --ld-purple: #7b2cbf;
+        --ld-purple-light: #9d4edd;
+        --ld-purple-bg: rgba(123, 44, 191, 0.07);
+        --ld-green: #22c55e;
+        --ld-green-bg: rgba(34, 197, 94, 0.10);
+        --ld-red: #ef4444;
+        --ld-red-bg: rgba(239, 68, 68, 0.10);
+    }
+
+    /* ── Page wrapper ── */
+    .ld-page {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+    }
+
+    /* ── Breadcrumb ── */
+    .ld-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-muted, #94a3b8);
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+
+    .ld-breadcrumb a {
+        color: var(--ld-purple);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .ld-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .ld-bc-sep {
+        opacity: .5;
+    }
+
+    /* ── Hero ── */
+    .ld-hero {
+        margin-bottom: 40px;
+    }
+
+    .ld-label {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: var(--ld-purple);
+        background: var(--ld-purple-bg);
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 14px;
+    }
+
+    .ld-title {
+        font-size: clamp(24px, 4vw, 36px);
+        font-weight: 900;
+        color: var(--text-primary, #f1f5f9);
+        line-height: 1.2;
+        margin: 0 0 14px;
+    }
+
+    .ld-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted, #94a3b8);
+        flex-wrap: wrap;
+    }
+
+    .ld-meta svg {
+        flex-shrink: 0;
+    }
+
+    /* ── Content wrapper ── */
+    .ld-content {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .ld-layout {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+        .ld-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ld-sidebar {
+        background: var(--bg-card, #0f172a);
+        border-radius: 16px;
+        border: 1px solid var(--border-color, rgba(148, 163, 184, 0.35));
+        padding: 16px 14px;
+    }
+
+    .ld-sidebar-header {
+        margin-bottom: 12px;
+    }
+
+    .ld-sidebar-label {
+        display: inline-block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-weight: 700;
+        color: #7b2cbf;
+        background: rgba(123, 44, 191, 0.12);
+        padding: 3px 10px;
+        border-radius: 999px;
+        margin-bottom: 6px;
+    }
+
+    .ld-sidebar-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary, #f1f5f9);
+    }
+
+    .ld-lesson-list {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .ld-lesson-item {
+        margin-bottom: 4px;
+    }
+
+    .ld-lesson-item a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 13px;
+        color: var(--text-secondary, #cbd5e1);
+    }
+
+    .ld-lesson-item a:hover {
+        background: rgba(148, 163, 184, 0.12);
+    }
+
+    .ld-lesson-item.active a {
+        background: rgba(123, 44, 191, 0.18);
+        color: #fff;
+    }
+
+    .ld-lesson-order {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(123, 44, 191, 0.18);
+        color: #7b2cbf;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ld-lesson-item.active .ld-lesson-order {
+        background: #7b2cbf;
+        color: #fff;
+    }
+
+    .ld-main {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    /* ── Section common ── */
+    .ld-section-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--ld-purple);
+        margin-bottom: 18px;
+    }
+
+    /* ── Video ── */
+    .ld-video-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+        /* 16:9 */
+        border-radius: 16px;
+        overflow: hidden;
+        background: #0f0f0f;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+    }
+
+    .ld-video-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* ── Text content ── */
+    .ld-prose {
+        font-size: 16px;
+        line-height: 1.85;
+        color: var(--text-secondary, #cbd5e1);
+    }
+
+    .ld-prose p {
+        margin: 0 0 18px;
+    }
+
+    .ld-prose strong {
+        color: var(--text-primary, #f1f5f9);
+    }
+
+    /* ── Quiz card ── */
+    .ld-quiz-card {
+        background: var(--bg-card, #1e293b);
+        border: 1px solid var(--border-color, rgba(255, 255, 255, .08));
+        border-radius: 20px;
+        padding: 32px;
+    }
+
+    .ld-quiz-question {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary, #f1f5f9);
+        margin: 0 0 24px;
+        line-height: 1.4;
+    }
+
+    /* ── Options ── */
+    .ld-quiz-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ld-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border: 1.5px solid var(--border-color, rgba(255, 255, 255, .08));
+        border-radius: 12px;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        user-select: none;
+    }
+
+    .ld-option:hover {
+        border-color: var(--ld-purple);
+        background: var(--ld-purple-bg);
+    }
+
+    .ld-option input[type="radio"] {
+        display: none;
+    }
+
+    .ld-option-letter {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(123, 44, 191, .12);
+        color: var(--ld-purple);
+        font-size: 13px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .2s, color .2s;
+    }
+
+    .ld-option-text {
+        font-size: 15px;
+        color: var(--text-secondary, #cbd5e1);
+        line-height: 1.4;
+    }
+
+    /* Selected state */
+    .ld-option.selected {
+        border-color: var(--ld-purple);
+        background: var(--ld-purple-bg);
+    }
+
+    .ld-option.selected .ld-option-letter {
+        background: var(--ld-purple);
+        color: #fff;
+    }
+
+    /* Correct / Wrong states */
+    .ld-option.correct {
+        border-color: var(--ld-green) !important;
+        background: var(--ld-green-bg) !important;
+    }
+
+    .ld-option.correct .ld-option-letter {
+        background: var(--ld-green) !important;
+        color: #fff !important;
+    }
+
+    .ld-option.wrong {
+        border-color: var(--ld-red) !important;
+        background: var(--ld-red-bg) !important;
+    }
+
+    .ld-option.wrong .ld-option-letter {
+        background: var(--ld-red) !important;
+        color: #fff !important;
+    }
+
+    /* ── Buttons ── */
+    .ld-quiz-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+
+    .ld-check-btn {
+        padding: 13px 32px;
+        background: linear-gradient(135deg, var(--ld-purple), var(--ld-purple-light));
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 6px 20px rgba(123, 44, 191, .35);
+    }
+
+    .ld-check-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(123, 44, 191, .45);
+    }
+
+    .ld-check-btn:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .ld-retry-btn {
+        padding: 13px 28px;
+        background: transparent;
+        border: 1.5px solid var(--border-color, rgba(255, 255, 255, .12));
+        border-radius: 12px;
+        color: var(--text-muted, #94a3b8);
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color .2s, color .2s;
+    }
+
+    .ld-retry-btn:hover {
+        border-color: var(--ld-purple);
+        color: var(--ld-purple);
+    }
+
+    /* ── Result message ── */
+    .ld-result {
+        margin-top: 20px;
+        padding: 16px 20px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ld-result.correct-msg {
+        background: var(--ld-green-bg);
+        color: var(--ld-green);
+        border: 1px solid rgba(34, 197, 94, .2);
+    }
+
+    .ld-result.wrong-msg {
+        background: var(--ld-red-bg);
+        color: var(--ld-red);
+        border: 1px solid rgba(239, 68, 68, .2);
+    }
+
+    /* ── Navigation ── */
+    .ld-nav-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color, rgba(255, 255, 255, .06));
+    }
+
+    .ld-nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        background: var(--bg-card, #1e293b);
+        border: 1px solid var(--border-color, rgba(255, 255, 255, .08));
+        border-radius: 14px;
+        text-decoration: none;
+        color: var(--text-primary, #f1f5f9);
+        transition: border-color .2s, transform .2s;
+    }
+
+    .ld-nav-btn:hover {
+        border-color: var(--ld-purple);
+        transform: translateY(-2px);
+    }
+
+    .ld-nav-btn span {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .ld-nav-btn small {
+        font-size: 11px;
+        color: var(--text-muted, #94a3b8);
+        font-weight: 600;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .ld-nav-btn strong {
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .ld-nav-next {
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .ld-nav-prev {
+        justify-content: flex-start;
+    }
+
+    @media (max-width: 580px) {
+        .ld-nav-row {
+            grid-template-columns: 1fr;
+        }
+
+        .ld-nav-next {
+            justify-content: flex-start;
+            text-align: left;
+        }
+    }
+
+    /* ── Locked state ── */
+    .ld-locked {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 60vh;
+        gap: 18px;
+        padding: 40px 20px;
+    }
+
+    .ld-locked-icon {
+        font-size: 72px;
+    }
+
+    .ld-locked h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-primary, #f1f5f9);
+        margin: 0;
+    }
+
+    .ld-locked p {
+        font-size: 16px;
+        color: var(--text-muted, #94a3b8);
+        margin: 0;
+        max-width: 340px;
+        line-height: 1.6;
+    }
+
+    .ld-locked-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 13px 32px;
+        background: linear-gradient(135deg, var(--ld-purple), var(--ld-purple-light));
+        color: #fff;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 6px 20px rgba(123, 44, 191, .35);
+        transition: transform .15s, box-shadow .15s;
+    }
+
+    .ld-locked-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(123, 44, 191, .5);
+    }
+</style>
+
+
+{# ════════════════════════════════════════════ JS ════════════════════════════════════════════ #}
+{% if is_purchased and lesson.quiz %}
+<script>
+    // Збереження прогресу уроків у localStorage
+    function markLessonCompleted() {
+        const root = document.getElementById('lessonRoot');
+        if (!root) return;
+
+        const courseId = root.getAttribute('data-course-id');
+        const lessonId = root.getAttribute('data-lesson-id');
+        const totalLessons = parseInt(root.getAttribute('data-total-lessons') || '0', 10) || 0;
+
+        if (!courseId || !lessonId) return;
+
+        const lessonKey = 'finsmart_lesson_' + courseId + '_' + lessonId;
+        const countKey = 'finsmart_course_' + courseId + '_completed_count';
+        const totalKey = 'finsmart_course_' + courseId + '_total_lessons';
+
+        if (!localStorage.getItem(totalKey) && totalLessons) {
+            localStorage.setItem(totalKey, String(totalLessons));
+        }
+
+        if (!localStorage.getItem(lessonKey)) {
+            localStorage.setItem(lessonKey, '1');
+            const prev = parseInt(localStorage.getItem(countKey) || '0', 10);
+            localStorage.setItem(countKey, String(prev + 1));
+        }
+    }
+
+    (function () {
+        // The correct answer letter comes from Django context (server-rendered)
+        const CORRECT = "{{ lesson.quiz.correct_answer|lower }}";
+
+        const options = document.querySelectorAll('.ld-option');
+        const checkBtn = document.getElementById('checkBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const result = document.getElementById('quizResult');
+
+        // Highlight selected option on click
+        options.forEach(function (label) {
+            label.addEventListener('click', function () {
+                options.forEach(function (o) { o.classList.remove('selected'); });
+                label.classList.add('selected');
+            });
+        });
+
+        window.checkAnswer = function () {
+            const chosen = document.querySelector('input[name="answer"]:checked');
+
+            if (!chosen) {
+                result.style.display = 'flex';
+                result.className = 'ld-result wrong-msg';
+                result.innerHTML = '⚠️ Оберіть один із варіантів!';
+                return;
+            }
+
+            const userAnswer = chosen.value.toLowerCase();
+            const isCorrect = (userAnswer === CORRECT);
+
+            // Lock all options
+            options.forEach(function (label) {
+                label.style.pointerEvents = 'none';
+                const radio = label.querySelector('input[type="radio"]');
+                const letter = radio ? radio.value.toLowerCase() : '';
+
+                if (letter === CORRECT) {
+                    label.classList.add('correct');
+                }
+                if (letter === userAnswer && !isCorrect) {
+                    label.classList.add('wrong');
+                }
+            });
+
+            // Show result
+            result.style.display = 'flex';
+            if (isCorrect) {
+                result.className = 'ld-result correct-msg';
+                result.innerHTML = '✅ Правильно! Молодець!';
+                // Показуємо кнопку "Наступний урок" тільки після правильної відповіді
+                var nextBtn = document.getElementById('nextLessonBtn');
+                if (nextBtn) {
+                    nextBtn.style.display = 'flex';
+                }
+                // Оновлюємо прогрес у localStorage
+                markLessonCompleted();
+            } else {
+                result.className = 'ld-result wrong-msg';
+                result.innerHTML = '❌ Спробуй ще раз. Правильна відповідь підсвічена зеленим.';
+            }
+
+            // Show/hide buttons
+            checkBtn.disabled = true;
+            retryBtn.style.display = 'inline-flex';
+        };
+
+        window.resetQuiz = function () {
+            // Clear all states
+            options.forEach(function (label) {
+                label.classList.remove('selected', 'correct', 'wrong');
+                label.style.pointerEvents = '';
+            });
+            document.querySelectorAll('input[name="answer"]').forEach(function (r) {
+                r.checked = false;
+            });
+            result.style.display = 'none';
+            checkBtn.disabled = false;
+            retryBtn.style.display = 'none';
+        };
+    })();
+</script>
+{% endif %}
+
+{% endblock %}

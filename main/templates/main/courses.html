@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Курси - FinSmart" %}{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">{% trans "Наші курси" %}</h1>
+        <p class="page-description">
+            {% trans "Оберіть курс, який підходить саме вам, та почніть свій шлях до фінансової грамотності" %}
+        </p>
+    </div>
+</section>
+
+<!-- Courses Controls -->
+<section class="courses-controls">
+    <div class="container">
+        <div class="courses-controls">
+            <div class="search-box">
+                <input type="text" id="courseSearch" placeholder="{% trans 'Пошук курсів...' %}" value="{{ search_query }}">
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn {% if current_category == 'all' %}active{% endif %}" data-category="all">{% trans "Всі курси" %}</button>
+                <button class="filter-btn {% if current_category == 'budgeting' %}active{% endif %}"
+                    data-category="budgeting">{% trans "Бюджетування" %}</button>
+                <button class="filter-btn {% if current_category == 'investing' %}active{% endif %}"
+                    data-category="investing">{% trans "Інвестиції" %}</button>
+                <button class="filter-btn {% if current_category == 'credit' %}active{% endif %}"
+                    data-category="credit">{% trans "Кредити" %}</button>
+                <button class="filter-btn {% if current_category == 'pension' %}active{% endif %}"
+                    data-category="pension">{% trans "Пенсії" %}</button>
+                <a href="{% url 'index' %}#pricing" class="filter-btn" style="text-decoration: none;">💳 {% trans "Підписки" %}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Premium Courses Section -->
+<section class="premium-courses-section" style="padding: 40px 0; background-color: var(--bg-primary);">
+    <div class="container">
+        <h2 class="section-title">{% trans "Наші Преміум Курси" %}</h2>
+        <div class="courses-grid">
+            {% for course in premium_courses %}
+            <div class="course-card animate-on-scroll"
+                style="border: 2px solid var(--accent-orange); display: flex; flex-direction: column; height: 100%;">
+                <div style="flex-grow: 1;">
+                    <div class="course-icon" style="background: #FFF3E0;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F57C00" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <h3 class="course-title">{{ course.title }}</h3>
+                    <p class="course-description">{{ course.description|truncatewords:15 }}</p>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0 15px;">
+                <div style="margin-bottom: 12px;">
+                    {% if course.has_student_discount %}
+                    <div style="font-size: 12px; color: var(--text-muted); text-decoration: line-through;">
+                        {{ course.price }} грн
+                    </div>
+                    {% endif %}
+                    <div style="font-weight: 800; color: var(--accent-orange);">
+                        {{ course.display_price }} грн
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: stretch; gap: 10px;">
+                    <a href="{% url 'course_detail' course.id %}"
+                        style="border: 1px solid #4a8fd5; color: #4a8fd5; flex: 1; text-align: center; border-radius: 8px; padding: 12px 0; background: rgba(74, 143, 213, 0.1); text-decoration: none; font-weight: 600; display: block;">
+                        Детальніше
+                    </a>
+                    <button id="btn-add-{{ course.id }}" onclick="addToCart(event, '{{ course.id }}')"
+                        style="background: #f39c12; color: white; flex: 1; text-align: center; border-radius: 8px; font-weight: bold; border: none; padding: 12px 0; cursor: pointer;">
+                        В кошик
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section class="courses-section">
+    <div class="container">
+        <div class="courses-grid">
+            {% for course in courses %}
+            <div class="course-card animate-on-scroll" data-category="{{ course.category }}">
+                <div class="course-icon" style="background: #E3F2FD;">
+                    {% if course.category == 'budgeting' %}
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="20" fill="#4A8FD5" />
+                        <path d="M 24 24 L 24 8 A 16 16 0 0 1 38 24 Z" fill="#fff" />
+                        <path d="M 24 24 L 38 24 A 16 16 0 0 1 24 40 Z" fill="#7DB3E8" />
+                    </svg>
+                    {% elif course.category == 'investing' %}
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="6" y="6" width="36" height="36" rx="4" fill="#4A8FD5" />
+                        <path d="M 12 32 L 18 26 L 24 28 L 30 20 L 36 24" stroke="#fff" stroke-width="3" fill="none"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <polyline points="30,20 36,20 36,24" stroke="#fff" stroke-width="3" fill="none"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    {% elif course.category == 'credit' %}
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="6" y="10" width="36" height="28" rx="4" fill="#4A8FD5" />
+                        <rect x="6" y="10" width="36" height="8" rx="4" fill="#1e5a8e" />
+                        <line x1="12" y1="24" x2="28" y2="24" stroke="#fff" stroke-width="2.5" stroke-linecap="round" />
+                        <line x1="12" y1="30" x2="22" y2="30" stroke="#fff" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                    {% elif course.category == 'pension' %}
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="18" stroke="#4A8FD5" stroke-width="4" fill="none" />
+                        <path d="M24 12V24L32 28" stroke="#4A8FD5" stroke-width="3" stroke-linecap="round" />
+                    </svg>
+                    {% else %}
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="20" fill="#4A8FD5" />
+                        <path d="M 24 24 L 24 8 A 16 16 0 0 1 38 24 Z" fill="#fff" />
+                        <path d="M 24 24 L 38 24 A 16 16 0 0 1 24 40 Z" fill="#7DB3E8" />
+                    </svg>
+                    {% endif %}
+                </div>
+                <h3 class="course-title">{{ course.title }}</h3>
+                <p class="course-description">{{ course.description }}</p>
+                <div class="course-footer">
+                    <div class="course-rating">
+                        <span class="stars">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= course.rating %}⭐{% endif %} {% endfor %} </span>
+                                <span class="rating-text">{{ course.rating }}</span>
+                    </div>
+                    {% if course.is_premium %}
+                    <div style="font-weight: 800; color: var(--brand-primary); margin-right: 10px;">
+                        {% if course.has_student_discount %}
+                        <span style="font-size: 12px; color: var(--text-muted); text-decoration: line-through; margin-right: 6px;">
+                            {{ course.price }} грн
+                        </span>
+                        {% endif %}
+                        {{ course.display_price }} грн
+                    </div>
+                    <a href="{% url 'course_detail' course.id %}" class="btn-secondary">Детальніше</a>
+                    {% else %}
+                    <a href="{% url 'free_lesson' course.id %}" class="btn-secondary">Почати</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-courses">
+                <h3>Курси не знайдено</h3>
+                <p>Спробуйте змінити фільтри або пошуковий запит</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Course filtering functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const searchInput = document.getElementById('courseSearch');
+
+        // Filter by category
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const category = this.dataset.category;
+                const searchTerm = searchInput.value;
+
+                // Update URL
+                const url = new URL(window.location);
+                if (category === 'all') {
+                    url.searchParams.delete('category');
+                } else {
+                    url.searchParams.set('category', category);
+                }
+                if (searchTerm) {
+                    url.searchParams.set('search', searchTerm);
+                } else {
+                    url.searchParams.delete('search');
+                }
+
+                window.location.href = url.toString();
+            });
+        });
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value;
+                const activeFilter = document.querySelector('.filter-btn.active');
+                const category = activeFilter ? activeFilter.dataset.category : 'all';
+
+                // Update URL
+                const url = new URL(window.location);
+                if (category === 'all') {
+                    url.searchParams.delete('category');
+                } else {
+                    url.searchParams.set('category', category);
+                }
+                if (searchTerm) {
+                    url.searchParams.set('search', searchTerm);
+                } else {
+                    url.searchParams.delete('search');
+                }
+
+                // Debounce the search
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    window.location.href = url.toString();
+                }, 500);
+            });
+        }
+    });
+</script>
+{% endblock %}

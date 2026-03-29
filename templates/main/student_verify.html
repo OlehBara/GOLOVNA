@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Верифікація студента – FinSmart{% endblock %}
+
+{% block content %}
+<section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
+    <div style="max-width: 520px; width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h2 style="color: var(--text-primary); font-size: 24px; font-weight: 800; margin-bottom: 8px; text-align: center;">
+            🎓 Верифікація студента
+        </h2>
+        <p style="color: var(--text-secondary); text-align: center; margin-bottom: 32px; font-size: 14px; line-height: 1.6;">
+            Завантажте фото студентського квитка або учнівського документа для підтвердження вашого статусу та отримання знижки.
+        </p>
+
+        {% if existing and existing.status == 'approved' %}
+            <div style="text-align: center; padding: 24px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 14px;">
+                <span style="font-size: 40px;">✅</span>
+                <p style="color: #22c55e; font-weight: 700; margin-top: 12px;">Ваш статус підтверджено!</p>
+                <a href="{% url 'index' %}#pricing" style="color: var(--brand-primary); text-decoration: underline; font-size: 14px;">
+                    Перейти до тарифів →
+                </a>
+            </div>
+        {% elif existing and existing.status == 'rejected' %}
+            <div style="text-align: center; padding: 24px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; margin-bottom: 24px;">
+                <span style="font-size: 40px;">❌</span>
+                <p style="color: #ef4444; font-weight: 700; margin-top: 12px;">Попередня заявка відхилена.</p>
+                <p style="color: var(--text-secondary); font-size: 13px;">Спробуйте завантажити інший документ.</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="document_photo" style="display: block; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                    Фото документа
+                </label>
+                <input type="file" name="document_photo" id="document_photo" accept="image/*" required
+                    style="width: 100%; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); margin-bottom: 24px;">
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 16px; border-radius: 12px;">
+                    Надіслати на перевірку
+                </button>
+            </form>
+        {% else %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="document_photo" style="display: block; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                    Фото документа
+                </label>
+                <input type="file" name="document_photo" id="document_photo" accept="image/*" required
+                    style="width: 100%; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); margin-bottom: 24px;">
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 16px; border-radius: 12px;">
+                    Надіслати на перевірку
+                </button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

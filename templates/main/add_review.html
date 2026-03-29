@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Залишити відгук — {{ course.title }} | FinSmart{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+        --v6: #6c22b8;
+        --v5: #8b3fd6;
+        --v4: #a855f7;
+        --gold: #f1c40f;
+        --green: #22c55e;
+        --bg: #0f0a1e;
+        --card: #1e1535;
+        --txt: #f1ecff;
+        --muted: #94a3b8;
+        --border: rgba(168, 85, 247, .15);
+        --radius: 16px;
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--txt);
+    }
+
+    .rv-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 20px 80px;
+    }
+
+    .rv-card {
+        width: 100%;
+        max-width: 600px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 44px 40px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
+    }
+
+    @media(max-width:520px) {
+        .rv-card {
+            padding: 28px 20px;
+        }
+    }
+
+    .rv-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: var(--v4);
+        background: rgba(168, 85, 247, .12);
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 14px;
+    }
+
+    .rv-title {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--txt);
+        margin: 0 0 6px;
+        line-height: 1.2;
+    }
+
+    .rv-course-name {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0 0 32px;
+        font-weight: 500;
+    }
+
+    .rv-course-name strong {
+        color: var(--v4);
+    }
+
+    .rv-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 28px 0;
+    }
+
+    .rv-label {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: var(--muted);
+        margin-bottom: 14px;
+        display: block;
+    }
+
+    /*
+     * Pure CSS star rating — reverse-order trick.
+     * Stars 5→1 are rendered right-to-left via flex-direction:row-reverse.
+     * :checked ~ label highlights the checked star AND all stars to its right
+     * (which are visually to the left = lower numbered stars).
+     */
+    .rv-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-bottom: 28px;
+    }
+
+    .rv-stars input[type="radio"] {
+        display: none;
+    }
+
+    .rv-stars label {
+        font-size: 40px;
+        line-height: 1;
+        cursor: pointer;
+        color: rgba(255, 255, 255, .15);
+        transition: color .15s, transform .1s;
+        user-select: none;
+    }
+
+    .rv-stars label:hover,
+    .rv-stars label:hover~label {
+        color: var(--gold);
+        transform: scale(1.12);
+    }
+
+    .rv-stars input[type="radio"]:checked~label {
+        color: var(--gold);
+    }
+
+    .rv-textarea {
+        width: 100%;
+        min-height: 130px;
+        background: rgba(255, 255, 255, .04);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        color: var(--txt);
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 14px 16px;
+        resize: vertical;
+        outline: none;
+        transition: border-color .2s;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .rv-textarea::placeholder {
+        color: var(--muted);
+    }
+
+    .rv-textarea:focus {
+        border-color: var(--v4);
+        background: rgba(168, 85, 247, .04);
+    }
+
+    .rv-actions {
+        display: flex;
+        gap: 14px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+    }
+
+    .rv-submit {
+        flex: 1;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, var(--v6), var(--v4));
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 8px 28px rgba(168, 85, 247, .4);
+        min-width: 160px;
+    }
+
+    .rv-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 36px rgba(168, 85, 247, .55);
+    }
+
+    .rv-cancel {
+        padding: 14px 24px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: border-color .2s, color .2s;
+    }
+
+    .rv-cancel:hover {
+        border-color: var(--v4);
+        color: var(--v4);
+    }
+
+    .rv-alert {
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .rv-alert.error {
+        background: rgba(239, 68, 68, .1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, .25);
+    }
+
+    .rv-alert.success {
+        background: rgba(34, 197, 94, .1);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, .25);
+    }
+
+    .rv-existing-notice {
+        background: rgba(241, 196, 15, .08);
+        border: 1px solid rgba(241, 196, 15, .25);
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 14px;
+        color: var(--gold);
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+
+<div class="rv-page">
+    <div class="rv-card">
+
+        <span class="rv-badge">Відгук про курс</span>
+        <h1 class="rv-title">
+            {% if existing %}Редагувати відгук{% else %}Залишити відгук{% endif %}
+        </h1>
+        <p class="rv-course-name">Курс: <strong>{{ course.title }}</strong></p>
+
+        {% for message in messages %}
+        <div class="rv-alert {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {% if existing %}
+        <div class="rv-existing-notice">
+            ✏️ Ви вже залишали відгук — ви можете оновити його нижче.
+        </div>
+        {% endif %}
+
+        <div class="rv-divider"></div>
+
+        <form method="POST" action="{% url 'add_review' course.id %}">
+            {% csrf_token %}
+
+            <span class="rv-label">Ваша оцінка</span>
+            <div class="rv-stars">
+                <input type="radio" id="star5" name="rating" value="5" {% if existing %}{% if existing.rating==5
+                    %}checked{% endif %}{% else %}checked{% endif %}>
+                <label for="star5" title="5 зірок">★</label>
+
+                <input type="radio" id="star4" name="rating" value="4" {% if existing %}{% if existing.rating==4
+                    %}checked{% endif %}{% endif %}>
+                <label for="star4" title="4 зірки">★</label>
+
+                <input type="radio" id="star3" name="rating" value="3" {% if existing %}{% if existing.rating==3
+                    %}checked{% endif %}{% endif %}>
+                <label for="star3" title="3 зірки">★</label>
+
+                <input type="radio" id="star2" name="rating" value="2" {% if existing %}{% if existing.rating==2
+                    %}checked{% endif %}{% endif %}>
+                <label for="star2" title="2 зірки">★</label>
+
+                <input type="radio" id="star1" name="rating" value="1" {% if existing %}{% if existing.rating==1
+                    %}checked{% endif %}{% endif %}>
+                <label for="star1" title="1 зірка">★</label>
+            </div>
+
+            <span class="rv-label">Ваш відгук</span>
+            <textarea name="text" class="rv-textarea"
+                placeholder="Розкажіть, що вам сподобалось або що можна покращити…"
+                required>{% if existing %}{{ existing.text }}{% endif %}</textarea>
+
+            <div class="rv-actions">
+                <button type="submit" class="rv-submit">
+                    {% if existing %}Оновити відгук{% else %}Надіслати відгук{% endif %}
+                </button>
+                <a href="{% url 'profile' %}" class="rv-cancel">← Скасувати</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

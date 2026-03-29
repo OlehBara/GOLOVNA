@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "FinSmart - Система рекомендацій з фінансової грамотності" %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Toastify.js -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        .support-chat-toggle {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            width: 54px;
+            height: 54px;
+            border-radius: 999px;
+            border: none;
+            background: radial-gradient(circle at 0 0, #38bdf8, #0f172a);
+            color: #e5f6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.65);
+            cursor: pointer;
+            z-index: 60;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+        }
+
+        .support-chat-toggle:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 22px 55px rgba(15, 23, 42, 0.75);
+        }
+
+        .support-chat-toggle-icon {
+            font-size: 22px;
+        }
+
+        .support-chat-panel {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            width: 420px;
+            max-width: calc(100vw - 40px);
+            height: 520px;
+            max-height: calc(100vh - 100px);
+            border-radius: 24px;
+            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.96));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow:
+                0 26px 80px rgba(15, 23, 42, 0.95),
+                0 0 0 1px rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 70;
+            transform: translateY(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .support-chat-panel.is-open {
+            pointer-events: auto;
+            opacity: 1;
+            animation: chat-spring-in 520ms cubic-bezier(0.22, 1.2, 0.32, 1) forwards;
+        }
+
+        @keyframes chat-spring-in {
+            0% {
+                transform: translateY(120%) scale(0.9);
+            }
+
+            55% {
+                transform: translateY(-6px) scale(1.02);
+            }
+
+            80% {
+                transform: translateY(3px) scale(0.995);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .support-chat-header {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            background: linear-gradient(120deg, rgba(15, 23, 42, 0.92), rgba(30, 64, 175, 0.7));
+        }
+
+        .support-chat-header-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .support-chat-admin-tabs {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .support-chat-admin-tab {
+            flex-shrink: 0;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            color: #cbd5f5;
+            cursor: pointer;
+            background: rgba(15, 23, 42, 0.6);
+            max-width: 140px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .support-chat-admin-tab.is-active {
+            border-color: rgba(56, 189, 248, 0.9);
+            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.9), rgba(30, 64, 175, 0.9));
+            color: #0f172a;
+        }
+
+        .support-chat-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 0 0, #0ea5e9, #1e293b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #e0f2fe;
+            box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.8);
+        }
+
+        .support-chat-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .support-chat-subtitle {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .support-chat-close {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .support-chat-close:hover {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e5e7eb;
+        }
+
+        .support-chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: radial-gradient(circle at 0 0, rgba(8, 47, 73, 0.9), rgba(15, 23, 42, 0.95));
+            min-height: 0;  /* crucial for flex child to respect overflow */
+        }
+
+        .support-chat-messages {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            padding: 14px 14px 8px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+        }
+
+        .support-chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .support-chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.8);
+            border-radius: 999px;
+        }
+
+        .support-chat-message-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 8px;
+        }
+
+        .support-chat-message-row.me {
+            align-items: flex-end;
+        }
+
+        .support-chat-message-meta {
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 2px;
+            max-width: 80%;
+        }
+
+        .support-chat-message-bubble {
+            max-width: 80%;
+            padding: 9px 11px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .support-chat-message-row.me .support-chat-message-bubble {
+            background: linear-gradient(135deg, #22c55e, #0f766e);
+            color: #ecfdf5;
+            border-bottom-right-radius: 4px;
+        }
+
+        .support-chat-message-row.them .support-chat-message-bubble {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-bottom-left-radius: 4px;
+        }
+
+        .support-chat-footer {
+            padding: 10px 10px 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+        }
+
+        .support-chat-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 999px;
+            padding: 4px 4px 4px 12px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .support-chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e5e7eb;
+            font-size: 13px;
+        }
+
+        .support-chat-input::placeholder {
+            color: #6b7280;
+        }
+
+        .support-chat-send {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            border: none;
+            background: radial-gradient(circle at 0 0, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ecfdf5;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(21, 128, 61, 0.7);
+        }
+
+        .support-chat-send:disabled {
+            opacity: 0.4;
+            cursor: default;
+            box-shadow: none;
+        }
+
+        .support-chat-send svg {
+            transform: translateX(1px);
+        }
+
+        @media (max-width: 768px) {
+            .support-chat-toggle {
+                left: 16px;
+                bottom: 16px;
+            }
+
+            .support-chat-panel {
+                left: 10px;
+                right: 10px;
+                width: auto;
+                height: 72vh;
+                max-height: calc(100vh - 80px);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Header / Navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-wrapper">
+                <!-- Logo -->
+                <a href="{% url 'index' %}" class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="20" fill="#1e5a8e" />
+                        <rect x="13" y="18" width="3" height="12" rx="1.5" fill="white" />
+                        <rect x="18.5" y="13" width="3" height="17" rx="1.5" fill="white" />
+                        <rect x="24" y="15" width="3" height="15" rx="1.5" fill="white" />
+                    </svg>
+                    <span class="logo-text">FinSmart</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="nav">
+                    <a href="{% url 'index' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">{% trans "Головна" %}</a>
+                    <a href="{% url 'courses' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">{% trans "Курси" %}</a>
+                    <a href="{% url 'about' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">{% trans "Про нас" %}</a>
+                    <a href="{% url 'contact' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">{% trans "Контакти" %}</a>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle" aria-label="{% trans 'Перемикач теми' %}">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        </svg>
+                    </button>
+
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn-register-desktop"
+                        style="background: #ffa048; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin-right: 15px; font-weight: 700; display: inline-flex; align-items: center;">Реєстрація</a>
+                    {% else %}
+                    <div class="user-menu" style="display: flex; align-items: center; gap: 15px; margin-right: 15px;">
+                        {% if user.is_staff %}
+                        <a href="/admin/" class="admin-link" title="Панель управління"
+                            style="font-size: 22px; text-decoration: none; line-height: 1; padding: 4px 6px; border-radius: 8px;">
+                            👑
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'profile' %}"
+                            style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+                            <div class="user-avatar-nav"
+                                style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brand-primary); display: flex; align-items: center; justify-content: center;">
+                                {% if user.profile.image and user.profile.image.url != '/media/default.jpg' %}
+                                <img src="{{ user.profile.image.url }}"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                <div class="letter-avatar" style="font-size: 0.9rem;">{{ user.username|first|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <span style="font-weight: 600; color: var(--text-primary);">{{ user.username }}</span>
+                        </a>
+                        <form method="post" action="{% url 'logout' %}"
+                            style="margin: 0; display: flex; align-items: center;">
+                            {% csrf_token %}
+                            <button type="submit"
+                                style="background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 4px; padding: 0;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'cart_detail' %}" class="cart-btn"
+                        style="position: relative; text-decoration: none; color: var(--text-primary); transition: color 0.3s ease; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <span id="cartBadge" class="cart-badge {% if cart_item_count <= 0 %}d-none{% endif %}">
+                            {{ cart_item_count|default:0 }}
+                        </span>
+                    </a>
+
+                    <!-- Burger Menu Button -->
+                    <div class="burger-menu" id="burgerMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="{% url 'index' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Головна</a>
+            <a href="{% url 'courses' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">Курси</a>
+            <a href="{% url 'about' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">Про нас</a>
+            <a href="{% url 'contact' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Контакти</a>
+
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="nav-link"
+                style="color: var(--accent-orange); font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Реєстрація
+            </a>
+            {% else %}
+            <div class="nav-link"
+                style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 0; border-bottom: none;">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                    <span
+                        style="width: 24px; height: 24px; background: var(--brand-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                        {{ user.username|make_list|first|upper }}
+                    </span>
+                    {{ user.username }}
+                </div>
+                {% if user.is_staff %}
+                <a href="/admin/" class="admin-link" style="font-size: 14px;">👑 Панель управління</a>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit"
+                        style="background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 8px; padding: 0; font-family: inherit;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Вийти
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Messages rendered as Toasts -->
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                showToast("{{ message|escapejs }}", "{{ message.tags }}");
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FinSmart</h3>
+                    <p class="footer-description">
+                        Ваш надійний партнер у світі фінансової грамотності
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Навігація</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'index' %}" class="footer-link">Головна</a>
+                        <a href="{% url 'courses' %}" class="footer-link">Курси</a>
+                        <a href="{% url 'about' %}" class="footer-link">Про нас</a>
+                        <a href="{% url 'contact' %}" class="footer-link">Контакти</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Курси</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'courses' %}?category=budgeting" class="footer-link">Бюджетування</a>
+                        <a href="{% url 'courses' %}?category=investing" class="footer-link">Інвестування</a>
+                        <a href="{% url 'courses' %}?category=credit" class="footer-link">Кредити</a>
+                        <a href="{% url 'courses' %}?category=pension" class="footer-link">Пенсії</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Підтримка</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'contact' %}" class="footer-link">Центр допомоги</a>
+                        <a href="#" class="footer-link">Політика конфіденційності</a>
+                        <a href="#" class="footer-link">Умови використання</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2025 FinSmart. Всі права захищені.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop" aria-label="Прокрутити вгору">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    {% if user.is_authenticated %}
+    <button class="support-chat-toggle" id="supportChatToggle" aria-label="Підтримка">
+        <span class="support-chat-toggle-icon">💬</span>
+    </button>
+    <div class="support-chat-panel" id="supportChatPanel"
+        data-user-id="{{ user.id }}"
+        data-is-staff="{% if user.is_staff %}1{% else %}0{% endif %}">
+        <div class="support-chat-header">
+                <div class="support-chat-header-main">
+                    <div class="support-chat-avatar">S</div>
+                    <div>
+                        <div class="support-chat-title">
+                            {% if user.is_staff %}Панель оператора{% else %}Чат з підтримкою{% endif %}
+                        </div>
+                        <div class="support-chat-subtitle">
+                            {% if user.is_staff %}Онлайн-діалоги з користувачами{% else %}Ми онлайн, щоб допомогти{% endif %}
+                        </div>
+                        {% if user.is_staff %}
+                        <div class="support-chat-admin-tabs" id="supportChatAdminTabs"></div>
+                        {% endif %}
+                    </div>
+                </div>
+            <button class="support-chat-close" id="supportChatClose" aria-label="Закрити чат">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="support-chat-body">
+            <div class="support-chat-messages" id="supportChatMessages"></div>
+        </div>
+        <div class="support-chat-footer">
+            <div class="support-chat-input-wrap">
+                <input type="text" id="supportChatInput" class="support-chat-input"
+                    placeholder="{% if user.is_staff %}Відповісти користувачу...{% else %}Напишіть повідомлення підтримці...{% endif %}">
+                <button class="support-chat-send" id="supportChatSend" aria-label="Надіслати">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <!-- Toastify.js -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        /**
+         * Global Premium Toast Helper
+         * @param {string} message - Message to display
+         * @param {string} type - 'success', 'error', 'warning', 'info'
+         */
+        function showToast(message, type = 'info') {
+            let icon = '<i class="fa-solid fa-circle-info" style="color: #e0f2fe; font-size: 18px;"></i>';
+            let borderColor = "transparent";
+            let shadowStr = "none";
+            let bgStr = "none";
+            let extraClass = "toast-shimmer-blue";
+            
+            if (type === 'success') {
+                icon = '<i class="fa-solid fa-check-circle" style="color: #34d399; font-size: 18px;"></i>';
+                borderColor = "rgba(16, 185, 129, 0.4)";
+                shadowStr = "0 12px 40px rgba(16, 185, 129, 0.15)";
+                bgStr = "linear-gradient(145deg, rgba(6, 78, 59, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            } else if (type === 'error' || type === 'danger') {
+                icon = '<i class="fa-solid fa-circle-exclamation" style="color: #f87171; font-size: 18px;"></i>';
+                borderColor = "rgba(239, 68, 68, 0.4)";
+                shadowStr = "0 12px 40px rgba(239, 68, 68, 0.2)";
+                bgStr = "linear-gradient(145deg, rgba(127, 29, 29, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            } else if (type === 'warning') {
+                icon = '<i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24; font-size: 18px;"></i>';
+                borderColor = "rgba(245, 158, 11, 0.4)";
+                shadowStr = "0 12px 40px rgba(245, 158, 11, 0.15)";
+                bgStr = "linear-gradient(145deg, rgba(120, 53, 15, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            }
+
+            const contentHTML = `
+                <div style="display: flex; align-items: center; gap: 16px; font-family: 'Inter', sans-serif;">
+                    <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);">
+                        ${icon}
+                    </div>
+                    <span style="font-size: 15px; font-weight: 500; letter-spacing: 0.3px; color: #f8fafc; line-height: 1.4;">${message}</span>
+                </div>
+            `;
+
+            let customStyle = {
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                borderRadius: "20px",
+                padding: "16px 24px 16px 20px",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center"
+            };
+
+            if (bgStr !== "none") {
+                customStyle.background = bgStr;
+                customStyle.boxShadow = shadowStr + ", inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 0 0 1px " + borderColor;
+            }
+
+            Toastify({
+                text: contentHTML,
+                escapeMarkup: false,
+                duration: 4500,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                className: "premium-toast " + extraClass,
+                style: customStyle
+            }).showToast();
+        }
+    </script>
+    <style>
+        @keyframes shimmer-bg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .toast-shimmer-blue {
+            background: linear-gradient(270deg, rgba(14, 165, 233, 0.95), rgba(56, 189, 248, 0.95), rgba(59, 130, 246, 0.95), rgba(99, 102, 241, 0.95)) !important;
+            background-size: 300% 300% !important;
+            animation: shimmer-bg 4s ease infinite !important;
+            border: 1px solid rgba(186, 230, 253, 0.4) !important;
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Custom close button for premium toasts */
+        .premium-toast .toast-close {
+            color: rgba(255, 255, 255, 0.6) !important;
+            font-size: 20px !important;
+            opacity: 1 !important;
+            transition: color 0.2s, transform 0.2s !important;
+            margin-left: 18px !important;
+            padding: 4px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .premium-toast .toast-close:hover {
+            color: #ffffff !important;
+            transform: scale(1.1) !important;
+        }
+    </style>
+
+    <script>
+        (function () {
+            const toggle = document.getElementById('supportChatToggle');
+            const panel = document.getElementById('supportChatPanel');
+            if (!toggle || !panel) return;
+
+            const closeBtn = document.getElementById('supportChatClose');
+            const messagesEl = document.getElementById('supportChatMessages');
+            const inputEl = document.getElementById('supportChatInput');
+            const sendBtn = document.getElementById('supportChatSend');
+
+            const userId = parseInt(panel.dataset.userId || '0', 10);
+            const isStaff = panel.dataset.isStaff === '1';
+            const adminTabs = document.getElementById('supportChatAdminTabs');
+
+            let socket = null;
+            let isOpen = false;
+            let activeChatUserId = null;
+            let reconnectDelay = 1000;   // start at 1s
+            let reconnectTimer = null;
+            const allMessages = [];
+            const adminUsers = {}; // id -> { username, lastMessage }
+
+            function scheduleReconnect() {
+                if (reconnectTimer) return;          // already scheduled
+                if (!isOpen) return;                 // panel closed, don't reconnect
+                reconnectTimer = setTimeout(function () {
+                    reconnectTimer = null;
+                    ensureConnection();
+                }, reconnectDelay);
+                reconnectDelay = Math.min(reconnectDelay * 2, 10000); // cap at 10s
+            }
+
+            function ensureConnection() {
+                if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+                    return;
+                }
+                const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+                const wsUrl = protocol + '://' + window.location.host + '/ws/support/';
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = function () {
+                    reconnectDelay = 1000;           // reset backoff on success
+                    updateSendState();
+                };
+
+                socket.onclose = function () {
+                    updateSendState();
+                    scheduleReconnect();              // auto-reconnect
+                };
+
+                socket.onerror = function () {
+                    updateSendState();
+                };
+
+                socket.onmessage = function (event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleIncomingMessage(data);
+                    } catch (e) {
+                        console.error('Bad WS message', e);
+                    }
+                };
+            }
+
+            function handleIncomingMessage(data) {
+                allMessages.push(data);
+
+                if (isStaff) {
+                    const chatUserId = data.chat_user_id;
+                    const chatUsername = data.chat_user_username || ('User #' + chatUserId);
+                    const preview = data.message || '';
+
+                    if (!adminUsers[chatUserId]) {
+                        adminUsers[chatUserId] = {
+                            id: chatUserId,
+                            username: chatUsername,
+                            last: preview,
+                        };
+                    } else {
+                        adminUsers[chatUserId].last = preview;
+                    }
+
+                    if (!activeChatUserId) {
+                        activeChatUserId = chatUserId;
+                    }
+                    renderAdminTabs();
+                }
+
+                renderMessages();
+            }
+
+            function renderAdminTabs() {
+                if (!isStaff || !adminTabs) return;
+
+                const ids = Object.keys(adminUsers);
+                if (!ids.length) {
+                    adminTabs.innerHTML = '';
+                    return;
+                }
+
+                // Ensure some active id
+                if (!activeChatUserId || !adminUsers[activeChatUserId]) {
+                    activeChatUserId = parseInt(ids[0], 10);
+                }
+
+                adminTabs.innerHTML = '';
+                ids
+                    .map(function (id) { return adminUsers[id]; })
+                    .sort(function (a, b) { return a.username.localeCompare(b.username); })
+                    .forEach(function (u) {
+                        const tab = document.createElement('button');
+                        tab.type = 'button';
+                        tab.className = 'support-chat-admin-tab' + (u.id === activeChatUserId ? ' is-active' : '');
+                        tab.textContent = u.username;
+                        tab.addEventListener('click', function () {
+                            activeChatUserId = u.id;
+                            renderAdminTabs();
+                            renderMessages();
+                        });
+                        adminTabs.appendChild(tab);
+                    });
+            }
+
+            function renderMessages() {
+                if (!messagesEl) return;
+                messagesEl.innerHTML = '';
+                const fragment = document.createDocumentFragment();
+
+                const visibleMessages = allMessages.filter(function (m) {
+                    if (!isStaff) {
+                        return m.chat_user_id === userId;
+                    }
+                    if (!activeChatUserId) {
+                        return false;
+                    }
+                    return m.chat_user_id === activeChatUserId;
+                });
+
+                visibleMessages.forEach((m) => {
+                    const row = document.createElement('div');
+                    const isMe = m.sender_id === userId;
+                    row.className = 'support-chat-message-row ' + (isMe ? 'me' : 'them');
+
+                    const meta = document.createElement('div');
+                    meta.className = 'support-chat-message-meta';
+                    const author = isStaff ? (isMe ? 'Ви (адмін)' : m.chat_user_username || 'Користувач') : (isMe ? 'Я' : 'Підтримка');
+                    meta.textContent = author;
+
+                    const bubble = document.createElement('div');
+                    bubble.className = 'support-chat-message-bubble';
+                    bubble.textContent = m.message;
+
+                    row.appendChild(meta);
+                    row.appendChild(bubble);
+                    fragment.appendChild(row);
+                });
+
+                if (!visibleMessages.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'support-chat-message-row them';
+                    const bubble = document.createElement('div');
+                    bubble.className = 'support-chat-message-bubble';
+                    bubble.textContent = isStaff
+                        ? 'Поки що немає активних повідомлень від користувачів.'
+                        : 'Поставте своє запитання, і ми відповімо вам тут.';
+                    empty.appendChild(bubble);
+                    fragment.appendChild(empty);
+                }
+
+                messagesEl.appendChild(fragment);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            function updateSendState() {
+                const connected = socket && socket.readyState === WebSocket.OPEN;
+                if (!sendBtn) return;
+                sendBtn.disabled = !connected;
+            }
+
+            function sendMessage() {
+                if (!socket || socket.readyState !== WebSocket.OPEN) return;
+                const text = (inputEl.value || '').trim();
+                if (!text) return;
+                const payload = { message: text };
+                if (isStaff && activeChatUserId) {
+                    payload.target_user_id = activeChatUserId;
+                }
+                socket.send(JSON.stringify(payload));
+                inputEl.value = '';
+            }
+
+            toggle.addEventListener('click', function () {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    panel.classList.add('is-open');
+                    ensureConnection();
+                    setTimeout(() => {
+                        inputEl && inputEl.focus();
+                    }, 250);
+                } else {
+                    panel.classList.remove('is-open');
+                }
+            });
+
+            closeBtn.addEventListener('click', function () {
+                isOpen = false;
+                panel.classList.remove('is-open');
+            });
+
+            sendBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                sendMessage();
+            });
+
+            inputEl.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+
+</html>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} курс - FinSmart{% endblock %}
+
+{% block content %}
+<section style="padding: 80px 0; min-height: 80vh; background: var(--bg-secondary);">
+    <div class="container" style="max-width: 700px;">
+
+        <!-- Admin badge -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <span style="font-size: 24px;">👑</span>
+            <h1 style="font-size: 32px; font-weight: 800; color: var(--brand-primary);">{{ action }} курс</h1>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for message in messages %}
+            <div style="padding: 14px 18px; background: {% if message.tags == 'success' %}#d1fae5{% else %}#fee2e2{% endif %};
+                        color: {% if message.tags == 'success' %}#065f46{% else %}#991b1b{% endif %};
+                        border-radius: 10px; font-weight: 600; margin-bottom: 10px;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="background: var(--bg-primary); border-radius: 16px; padding: 40px;
+                    box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div style="margin-bottom: 22px;">
+                    <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; color: var(--text-primary);
+                               margin-bottom: 8px; font-size: 15px;">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color:#e53e3e">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p style="color: #e53e3e; font-size: 13px; margin-top: 4px;">{{ field.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div style="display: flex; gap: 14px; margin-top: 30px;">
+                    <button type="submit" class="btn-primary"
+                        style="padding: 13px 32px; font-size: 16px; border-radius: 10px; cursor: pointer;">
+                        {% if action == 'Додати' %}➕ Додати курс{% else %}💾 Зберегти зміни{% endif %}
+                    </button>
+                    <a href="{% if course %}{% url 'course_detail' course.id %}{% else %}{% url 'courses' %}{% endif %}"
+                        style="padding: 13px 24px; font-size: 16px; border-radius: 10px; text-decoration: none;
+                               color: var(--text-muted); border: 1px solid var(--border-color);
+                               display: inline-flex; align-items: center;">
+                        ✕ Скасувати
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .form-input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 15px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 3px rgba(30, 90, 142, 0.12);
+    }
+
+    [data-theme="dark"] .form-input {
+        background: var(--bg-primary);
+        border-color: #334155;
+        color: var(--text-primary);
+    }
+
+    /* Checkbox */
+    input[type="checkbox"].form-input {
+        width: auto;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}

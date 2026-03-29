@@ -1,0 +1,1172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.title }} — FinSmart{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ─── Google Font ─── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    /* ─── Design tokens ─── */
+    :root {
+        --violet-900: #1a0533;
+        --violet-800: #2d0a52;
+        --violet-700: #4a0e8f;
+        --violet-600: #6c22b8;
+        --violet-500: #8b3fd6;
+        --violet-400: #a855f7;
+        --violet-300: #c084fc;
+        --violet-100: #f3e8ff;
+        --gold: #f5b731;
+        --green: #22c55e;
+        --surface: #ffffff;
+        --surface-2: #f8f5ff;
+        --text-primary: #0f0a1e;
+        --text-muted: #64748b;
+        --radius-lg: 18px;
+        --radius-xl: 26px;
+        --shadow-md: 0 4px 24px rgba(108, 34, 184, .12);
+        --shadow-lg: 0 12px 48px rgba(108, 34, 184, .18);
+    }
+
+    [data-theme="dark"] {
+        --surface: #13062a;
+        --surface-2: #1d0d3a;
+        --text-primary: #f1ecff;
+        --text-muted: #94a3b8;
+        --shadow-md: 0 4px 24px rgba(0, 0, 0, .4);
+        --shadow-lg: 0 12px 48px rgba(0, 0, 0, .5);
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ─── HERO ─── */
+    .cd-hero {
+        background: linear-gradient(135deg, var(--violet-900) 0%, var(--violet-800) 40%, var(--violet-700) 100%);
+        position: relative;
+        overflow: hidden;
+        padding: 90px 0 80px;
+    }
+
+    .cd-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 60% 80% at 80% 20%, rgba(168, 85, 247, .25) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 60% at 10% 90%, rgba(74, 14, 143, .4) 0%, transparent 55%);
+        pointer-events: none;
+    }
+
+    .cd-hero-inner {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 60px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cd-badge-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .cd-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .3px;
+    }
+
+    .cd-badge-cat {
+        background: rgba(168, 85, 247, .25);
+        color: var(--violet-300);
+        border: 1px solid rgba(168, 85, 247, .35);
+    }
+
+    .cd-badge-star {
+        background: rgba(245, 183, 49, .18);
+        color: var(--gold);
+        border: 1px solid rgba(245, 183, 49, .3);
+    }
+
+    .cd-hero-title {
+        font-size: clamp(30px, 4vw, 48px);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.15;
+        margin: 0 0 20px;
+    }
+
+    .cd-hero-desc {
+        font-size: 17px;
+        color: rgba(255, 255, 255, .72);
+        line-height: 1.7;
+        margin-bottom: 36px;
+        max-width: 520px;
+    }
+
+    /* ─── Purchase block ─── */
+    .cd-price-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .cd-price {
+        font-size: 40px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -1px;
+    }
+
+    .cd-price span {
+        font-size: 20px;
+        font-weight: 500;
+        opacity: .7;
+        margin-left: 4px;
+    }
+
+    .btn-buy {
+        padding: 16px 44px;
+        background: linear-gradient(135deg, var(--violet-400), var(--violet-600));
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 30px rgba(168, 85, 247, .45);
+        transition: transform .2s, box-shadow .2s;
+        text-decoration: none;
+    }
+
+    .btn-buy:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 40px rgba(168, 85, 247, .55);
+        color: #fff;
+    }
+
+    .cd-access-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(34, 197, 94, .15);
+        border: 1.5px solid rgba(34, 197, 94, .4);
+        color: #6ee7b7;
+        border-radius: 50px;
+        padding: 12px 28px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .cd-access-badge .dot {
+        width: 10px;
+        height: 10px;
+        background: var(--green);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--green);
+        animation: pulse-dot 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: .5;
+            transform: scale(1.4);
+        }
+    }
+
+    .btn-go {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 44px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        border-radius: 50px;
+        font-size: 17px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 8px 30px rgba(34, 197, 94, .4);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .btn-go:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 40px rgba(34, 197, 94, .5);
+        color: #fff;
+    }
+
+    .btn-conspect {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        background: rgba(255, 255, 255, .12);
+        border: 1.5px solid rgba(255, 255, 255, .45);
+        color: #fff;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform .2s, background .2s, border-color .2s;
+    }
+
+    .btn-conspect:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, .2);
+        border-color: rgba(255, 255, 255, .75);
+        color: #fff;
+    }
+
+    /* already in cart badge */
+    .btn-in-cart-hero {
+        padding: 16px 44px;
+        background: rgba(74, 143, 213, .15);
+        border: 1.5px solid #4a8fd5;
+        color: #90cdf4;
+        border-radius: 50px;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: default;
+    }
+
+    /* ─── Course image card ─── */
+    .cd-img-card {
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, .35);
+        position: relative;
+    }
+
+    .cd-img-card img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .cd-img-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(108, 34, 184, .1), rgba(26, 5, 51, .4));
+    }
+
+    /* ─── ADMIN ACTIONS ─── */
+    .cd-admin-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding: 10px 18px;
+        background: rgba(245, 183, 49, .1);
+        border: 1px solid rgba(245, 183, 49, .3);
+        border-radius: 12px;
+        width: fit-content;
+    }
+
+    .cd-admin-bar span {
+        font-size: 13px;
+        color: var(--gold);
+        font-weight: 700;
+    }
+
+    .btn-admin-edit,
+    .btn-admin-delete {
+        padding: 7px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity .15s;
+    }
+
+    .btn-admin-edit {
+        background: rgba(255, 255, 255, .12);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, .25);
+    }
+
+    .btn-admin-delete {
+        background: rgba(239, 68, 68, .2);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, .35);
+    }
+
+    .btn-admin-edit:hover,
+    .btn-admin-delete:hover {
+        opacity: .8;
+    }
+
+    /* ─── INFO PANEL ─── */
+    .cd-info-panel {
+        padding: 70px 0;
+        background: var(--surface);
+    }
+
+    .cd-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+    }
+
+    .cd-info-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 28px 24px;
+        background: var(--surface-2);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(168, 85, 247, .12);
+        transition: box-shadow .2s, transform .2s;
+    }
+
+    .cd-info-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .cd-info-icon {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .ic-violet {
+        background: var(--violet-100);
+    }
+
+    [data-theme="dark"] .ic-violet {
+        background: rgba(168, 85, 247, .15);
+    }
+
+    .ic-gold {
+        background: #fef9ec;
+    }
+
+    [data-theme="dark"] .ic-gold {
+        background: rgba(245, 183, 49, .12);
+    }
+
+    .ic-green {
+        background: #f0fdf4;
+    }
+
+    [data-theme="dark"] .ic-green {
+        background: rgba(34, 197, 94, .1);
+    }
+
+    .ic-blue {
+        background: #eff6ff;
+    }
+
+    [data-theme="dark"] .ic-blue {
+        background: rgba(59, 130, 246, .1);
+    }
+
+    .cd-info-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .cd-info-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    /* ─── SECTION titles ─── */
+    .cd-section-label {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--violet-500);
+        margin-bottom: 10px;
+    }
+
+    .cd-section-title {
+        font-size: clamp(24px, 3vw, 36px);
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 48px;
+        line-height: 1.2;
+    }
+
+    /* ─── WHAT YOU LEARN ─── */
+    .cd-learn {
+        padding: 80px 0;
+        background: var(--surface-2);
+    }
+
+    .cd-learn-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .cd-learn-item {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 20px 22px;
+        background: var(--surface);
+        border-radius: 14px;
+        border: 1px solid rgba(168, 85, 247, .1);
+        transition: border-color .2s;
+    }
+
+    .cd-learn-item:hover {
+        border-color: rgba(168, 85, 247, .35);
+    }
+
+    .cd-learn-check {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--violet-500), var(--violet-400));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 1px;
+    }
+
+    .cd-learn-text {
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--text-primary);
+    }
+
+    /* ─── ACCORDION / CURRICULUM ─── */
+    .cd-curriculum {
+        padding: 80px 0;
+        background: var(--surface);
+    }
+
+    .cd-accordion {
+        max-width: 780px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .cd-acc-item {
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(168, 85, 247, .15);
+        overflow: hidden;
+        transition: box-shadow .2s;
+        background: var(--surface-2);
+    }
+
+    .cd-acc-item.open {
+        box-shadow: var(--shadow-md);
+        border-color: rgba(168, 85, 247, .35);
+    }
+
+    .cd-acc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 26px;
+        cursor: pointer;
+        user-select: none;
+        gap: 16px;
+    }
+
+    .cd-acc-header:hover {
+        background: rgba(168, 85, 247, .05);
+    }
+
+    .cd-acc-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cd-acc-num {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--violet-600), var(--violet-400));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .cd-acc-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.3;
+    }
+
+    .cd-acc-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 3px;
+        font-weight: 500;
+    }
+
+    .cd-acc-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+    }
+
+    .cd-lock-icon {
+        font-size: 18px;
+        opacity: .55;
+    }
+
+    .cd-acc-arrow {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(168, 85, 247, .12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: var(--violet-500);
+        transition: transform .3s;
+    }
+
+    .cd-acc-item.open .cd-acc-arrow {
+        transform: rotate(180deg);
+    }
+
+    .cd-acc-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height .35s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .cd-acc-item.open .cd-acc-body {
+        max-height: 600px;
+    }
+
+    .cd-lesson-list {
+        list-style: none;
+        margin: 0;
+        padding: 6px 26px 22px;
+        border-top: 1px solid rgba(168, 85, 247, .1);
+    }
+
+    .cd-lesson-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 0;
+        font-size: 14.5px;
+        color: var(--text-primary);
+        border-bottom: 1px solid rgba(168, 85, 247, .06);
+    }
+
+    .cd-lesson-list li:last-child {
+        border-bottom: none;
+    }
+
+    .cd-lesson-icon {
+        font-size: 15px;
+        flex-shrink: 0;
+        opacity: .7;
+    }
+
+    /* ─── AUTHOR ─── */
+    .cd-author {
+        padding: 80px 0;
+        background: var(--surface-2);
+    }
+
+    .cd-author-card {
+        max-width: 780px;
+        margin: 0 auto;
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: 48px 44px;
+        border: 1px solid rgba(168, 85, 247, .12);
+        box-shadow: var(--shadow-md);
+    }
+
+    .cd-author-avatar {
+        width: 110px;
+        height: 110px;
+        min-width: 110px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--violet-300);
+        box-shadow: 0 8px 24px rgba(168, 85, 247, .3);
+    }
+
+    .cd-author-fallback {
+        width: 110px;
+        height: 110px;
+        min-width: 110px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--violet-600), var(--violet-400));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        border: 4px solid var(--violet-300);
+        box-shadow: 0 8px 24px rgba(168, 85, 247, .3);
+    }
+
+    .cd-author-name {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .cd-author-role {
+        font-size: 14px;
+        color: var(--violet-500);
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .cd-author-bio {
+        font-size: 15px;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+
+    .cd-author-stats {
+        display: flex;
+        gap: 28px;
+        margin-top: 20px;
+    }
+
+    .cd-auth-stat strong {
+        display: block;
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .cd-auth-stat span {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+        .cd-hero-inner {
+            grid-template-columns: 1fr;
+        }
+
+        .cd-img-card {
+            display: none;
+        }
+
+        .cd-author-card {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 36px 24px;
+        }
+
+        .cd-author-stats {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .cd-hero {
+            padding: 60px 0 50px;
+        }
+
+        .cd-hero-title {
+            font-size: 28px;
+        }
+
+        .cd-info-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    /* ─── Reviews section ─── */
+    .cd-reviews {
+        padding: 90px 0;
+        background: #0b1020;
+        color: #e2e8f0;
+    }
+
+    .cd-reviews .cd-section-label {
+        color: #7dd3fc;
+    }
+
+    .cd-reviews .cd-section-title {
+        color: #f8fafc;
+    }
+
+    .cd-review-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .cd-review-card {
+        background: #1a2232;
+        border-radius: 16px;
+        padding: 22px;
+        border: 1px solid rgba(148, 163, 184, .12);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .25);
+    }
+
+    .cd-review-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+
+    .cd-review-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #7db3e8;
+        color: #0b1020;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: .5px;
+    }
+
+    .cd-review-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #f8fafc;
+    }
+
+    .cd-review-stars {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .cd-review-stars span {
+        color: rgba(245, 183, 49, .25);
+        font-size: 14px;
+    }
+
+    .cd-review-stars span.filled {
+        color: #f5b731;
+    }
+
+    .cd-review-text {
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: #cbd5f5;
+        margin: 0;
+    }
+
+    .cd-review-empty {
+        color: #94a3b8;
+        font-size: 14px;
+        background: rgba(255, 255, 255, .03);
+        border: 1px dashed rgba(148, 163, 184, .3);
+        padding: 20px;
+        border-radius: 14px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+</style>
+
+<!-- ══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<section class="cd-hero">
+    <div class="container">
+        <div class="cd-hero-inner">
+
+            <!-- LEFT COLUMN -->
+            <div>
+                <!-- badges: category + rating -->
+                <div class="cd-badge-row">
+                    <span class="cd-badge cd-badge-cat">
+                        📚 {{ course.get_category_display|default:course.category }}
+                    </span>
+                    <span class="cd-badge cd-badge-star">
+                        ★ {{ course.rating }} Рейтинг
+                    </span>
+                </div>
+
+                <!-- admin bar -->
+                {% if user.is_staff %}
+                <div class="cd-admin-bar">
+                    <span>👑 Режим адміна:</span>
+                    <a href="{% url 'edit_course' course.id %}" class="btn-admin-edit">✏️ Редагувати</a>
+                    <a href="{% url 'delete_course' course.id %}" class="btn-admin-delete">🗑️ Видалити</a>
+                </div>
+                {% endif %}
+
+                <h1 class="cd-hero-title">{{ course.title }}</h1>
+                <p class="cd-hero-desc">{{ course.description }}</p>
+
+                <!-- ── PURCHASE / ACCESS BLOCK ── -->
+                {% if is_purchased %}
+                <!-- ✅ Курс куплений -->
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                    <div class="cd-access-badge">
+                        <span class="dot"></span>
+                        Доступ відкрито
+                    </div>
+                    {% if 'бюджетування' in course.title|lower %}
+                    <a href="{% url 'lesson_budgeting_1' %}" class="btn-go">
+                        ▶ Перейти до навчання
+                    </a>
+                    {% elif 'сім' in course.title|lower %}
+                    <a href="{% url 'lesson_family_1' %}" class="btn-go">
+                        ▶ Перейти до навчання
+                    </a>
+                    {% elif 'грамотність' in course.title|lower %}
+                    <a href="{% url 'lesson_literacy_1' %}" class="btn-go">
+                        ▶ Перейти до навчання
+                    </a>
+                    {% else %}
+                    <a href="{% url 'profile' %}" class="btn-go">
+                        ▶ Перейти до навчання
+                    </a>
+                    {% endif %}
+                    {% if has_conspect %}
+                    <a href="{% url 'course_conspect' course.id %}" class="btn-conspect" title="Завантажити PDF-конспект з матеріалами курсу">
+                        📄 Завантажити конспект
+                    </a>
+                    {% endif %}
+                </div>
+                {% else %}
+                <!-- ❌ Курс не куплений -->
+                <div class="cd-price-row">
+                    <div class="cd-price">{{ course.price }}<span>UAH</span></div>
+
+                    {% if in_cart %}
+                    <button class="btn-in-cart-hero" disabled>✓ Вже в кошику</button>
+                    {% else %}
+                    <button id="btn-cart-{{ course.id }}" class="btn-buy">🛒 Додати в кошик</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT COLUMN — image card -->
+            <div class="cd-img-card">
+                <img src="{% static 'img/image 10.png' %}" alt="{{ course.title }}">
+                <div class="cd-img-overlay"></div>
+            </div>
+
+        </div><!-- /cd-hero-inner -->
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     INFO PANEL
+════════════════════════════════════════════════ -->
+<section class="cd-info-panel">
+    <div class="container">
+        <div class="cd-info-grid">
+
+            <div class="cd-info-card">
+                <div class="cd-info-icon ic-violet">⏱️</div>
+                <div>
+                    <div class="cd-info-label">Тривалість</div>
+                    <div class="cd-info-value">{{ course.duration|default:"4 тижні" }}</div>
+                </div>
+            </div>
+
+            <div class="cd-info-card">
+                <div class="cd-info-icon ic-gold">📖</div>
+                <div>
+                    <div class="cd-info-label">Кількість лекцій</div>
+                    <div class="cd-info-value">{{ modules|length|default:"0" }} модулі · 24 лекції</div>
+                </div>
+            </div>
+
+            <div class="cd-info-card">
+                <div class="cd-info-icon ic-green">🏅</div>
+                <div>
+                    <div class="cd-info-label">Рівень складності</div>
+                    <div class="cd-info-value">{% if course.is_premium %}Advanced{% else %}Beginner{% endif %}</div>
+                </div>
+            </div>
+
+            <div class="cd-info-card">
+                <div class="cd-info-icon ic-blue">🌐</div>
+                <div>
+                    <div class="cd-info-label">Мова</div>
+                    <div class="cd-info-value">Українська</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     WHAT YOU LEARN
+════════════════════════════════════════════════ -->
+<section class="cd-learn">
+    <div class="container">
+        <p class="cd-section-label">Результати навчання</p>
+        <h2 class="cd-section-title">Чого ви навчитеся</h2>
+
+        <div class="cd-learn-grid">
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Ефективно керувати особистими фінансами та складати бюджет</span>
+            </div>
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Розуміти принципи інвестування та будувати пасивний дохід</span>
+            </div>
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Уникати типових фінансових пасток та надмірних боргів</span>
+            </div>
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Вибирати банківські та інвестиційні інструменти під свої цілі</span>
+            </div>
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Скласти чіткий фінансовий план на 5–10 років</span>
+            </div>
+            <div class="cd-learn-item">
+                <div class="cd-learn-check">✓</div>
+                <span class="cd-learn-text">Читати та розуміти фінансову звітність компаній</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CURRICULUM — ACCORDION
+════════════════════════════════════════════════ -->
+<section class="cd-curriculum">
+    <div class="container">
+        <p class="cd-section-label">Програма курсу</p>
+        <h2 class="cd-section-title">Що вас чекає</h2>
+
+        <div class="cd-accordion" id="cd-accordion">
+            {% for module in modules %}
+            <div class="cd-acc-item" id="acc-{{ forloop.counter }}">
+                <div class="cd-acc-header" onclick="cdToggle('acc-{{ forloop.counter }}')">
+                    <div class="cd-acc-left">
+                        <div class="cd-acc-num">{{ forloop.counter }}</div>
+                        <div>
+                            <div class="cd-acc-title">{{ module.title }}</div>
+                            <div class="cd-acc-meta">
+                                {{ module.lessons|length }} урок{% if module.lessons|length != 1 %}и{% endif %}
+                                &nbsp;·&nbsp; {{ module.duration }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cd-acc-right">
+                        {% if not is_purchased %}
+                        <span class="cd-lock-icon">🔒</span>
+                        {% else %}
+                        <span class="cd-lock-icon">🔓</span>
+                        {% endif %}
+                        <div class="cd-acc-arrow">▼</div>
+                    </div>
+                </div>
+
+                <div class="cd-acc-body">
+                    <ul class="cd-lesson-list">
+                        {% for lesson in module.lessons %}
+                        <li>
+                            {% if is_purchased %}
+                            <span class="cd-lesson-icon">▶</span>
+                            {% else %}
+                            <span class="cd-lesson-icon">🔒</span>
+                            {% endif %}
+                            {{ lesson }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color:var(--text-muted); text-align:center; padding:40px 0;">
+                Програма курсу ще не додана.
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     AUTHOR
+════════════════════════════════════════════════ -->
+<section class="cd-author">
+    <div class="container">
+        <p class="cd-section-label">Ваш ментор</p>
+        <h2 class="cd-section-title">Про автора курсу</h2>
+
+        <div class="cd-author-card">
+            <div class="cd-author-fallback" role="img" aria-label="Автор">🎓</div>
+            <div style="flex:1;">
+                <div class="cd-author-name">Олексій Мартиненко</div>
+                <div class="cd-author-role">Фінансовий аналітик · CFP® · 12 років досвіду</div>
+                <p class="cd-author-bio">
+                    Сертифікований фінансовий планувальник з міжнародним досвідом у банківській та інвестиційній сферах.
+                    Протягом 12 років допомагав фізичним особам та підприємствам вибудовувати стійкі фінансові
+                    стратегії.
+                    Автор трьох книг з особистих фінансів, лектор Ukrainian Business School.
+                </p>
+                <div class="cd-author-stats">
+                    <div class="cd-auth-stat">
+                        <strong>4 200+</strong>
+                        <span>студентів</span>
+                    </div>
+                    <div class="cd-auth-stat">
+                        <strong>4.9 ★</strong>
+                        <span>рейтинг</span>
+                    </div>
+                    <div class="cd-auth-stat">
+                        <strong>12</strong>
+                        <span>курсів</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if course.is_premium %}
+<section class="cd-reviews">
+    <div class="container">
+        <p class="cd-section-label">Відгуки наших студентів</p>
+        <h2 class="cd-section-title">Що говорять про курс</h2>
+
+        <div class="cd-review-grid">
+            {% for review in course_reviews %}
+            <article class="cd-review-card">
+                <div class="cd-review-head">
+                    <div class="cd-review-avatar">{{ review.initials }}</div>
+                    <div>
+                        <div class="cd-review-name">{{ review.display_name }}</div>
+                        <div class="cd-review-stars">
+                            {% for i in "12345" %}
+                            <span class="{% if forloop.counter <= review.rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <p class="cd-review-text">"{{ review.text }}"</p>
+            </article>
+            {% empty %}
+            <div class="cd-review-empty">Поки що немає відгуків для цього курсу.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ════════════════════════
+     JS: Cart + Accordion
+════════════════════════ -->
+<script>
+    /* ── Accordion ── */
+    function cdToggle(id) {
+        const item = document.getElementById(id);
+        const isOpen = item.classList.contains('open');
+        // close all
+        document.querySelectorAll('.cd-acc-item.open').forEach(el => el.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+    }
+
+    /* ── Cart button ── */
+    (function () {
+        const btn = document.getElementById('btn-cart-{{ course.id }}');
+        if (!btn) return;
+
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            btn.textContent = 'Додаємо...';
+
+            const csrfToken = document.cookie.split('; ')
+                .find(r => r.startsWith('csrftoken='))
+                ?.split('=')[1] || '';
+
+            fetch("{% url 'add_to_cart' course.id %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                credentials: 'same-origin',
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.textContent = '✓ Додано';
+                        btn.className = 'btn-in-cart-hero';
+                        btn.removeAttribute('style');
+
+                        const badge = document.getElementById('cartBadge');
+                        if (badge && data.cart_count !== undefined) {
+                            badge.textContent = data.cart_count;
+                            badge.classList.remove('d-none');
+                        }
+
+                        setTimeout(() => { window.location.href = "{% url 'cart_detail' %}"; }, 700);
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = '🛒 Додати в кошик';
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🛒 Додати в кошик';
+                });
+        });
+    })();
+</script>
+
+{% endblock %}
