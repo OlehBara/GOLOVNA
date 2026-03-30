@@ -89,6 +89,16 @@
                         <span class="wf-total-label">Прогнозований баланс на пенсії</span>
                         <span class="wf-total-value" id="wf-total-balance">$0</span>
                     </div>
+
+                    <!-- Disclaimer Toast -->
+                    <div id="wf-disclaimer-toast" class="wf-toast">
+                        <div class="wf-toast-icon">⚠️</div>
+                        <div class="wf-toast-content">
+                            <h4 class="wf-toast-title">Важливе попередження</h4>
+                            <p class="wf-toast-text">Цей розрахунок є виключно освітньою наочною математичною моделлю і не є фінансовою порадою чи гарантією майбутніх доходів. Реальні інвестиції завжди пов'язані з ризиками зміни процентних ставок, інфляції та втрати капіталу.</p>
+                        </div>
+                        <button class="wf-toast-close" aria-label="Закрити">&times;</button>
+                    </div>
                 </div>
 
                 <!-- ── Wealth Forecast Styles ── -->
@@ -241,6 +251,7 @@
                         border-radius: 12px;
                         overflow: hidden;
                         background: rgba(74, 143, 213, .04);
+                        cursor: pointer; /* вказує користувачу, що графік клікабельний */
                     }
 
                     .wf-chart-wrap canvas {
@@ -314,6 +325,80 @@
                             font-size: 28px;
                         }
                     }
+
+                    /* ── Toast Disclaimer ── */
+                    .wf-toast {
+                        position: fixed;
+                        bottom: 30px;
+                        right: 30px;
+                        background: rgba(15, 23, 42, 0.95);
+                        backdrop-filter: blur(8px);
+                        border: 1px solid rgba(239, 68, 68, 0.3);
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        border-radius: 14px;
+                        padding: 18px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 14px;
+                        width: 340px;
+                        z-index: 9999;
+                        opacity: 0;
+                        transform: translateY(20px);
+                        pointer-events: none;
+                        transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+
+                    .wf-toast.show {
+                        opacity: 1;
+                        transform: translateY(0);
+                        pointer-events: auto;
+                    }
+
+                    .wf-toast-icon {
+                        font-size: 24px;
+                        line-height: 1;
+                    }
+
+                    .wf-toast-content {
+                        flex: 1;
+                    }
+
+                    .wf-toast-title {
+                        margin: 0 0 6px;
+                        font-size: 15px;
+                        font-weight: 800;
+                        color: #fca5a5; /* red-300 */
+                    }
+
+                    .wf-toast-text {
+                        margin: 0;
+                        font-size: 13px;
+                        color: #cbd5e1; /* slate-300 */
+                        line-height: 1.45;
+                    }
+
+                    .wf-toast-close {
+                        background: transparent;
+                        border: none;
+                        color: #94a3b8;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 0;
+                        line-height: 1;
+                    }
+
+                    .wf-toast-close:hover {
+                        color: #f1f5f9;
+                    }
+
+                    @media (max-width: 480px) {
+                        .wf-toast {
+                            bottom: 20px;
+                            right: 20px;
+                            left: 20px;
+                            width: auto;
+                        }
+                    }
                 </style>
 
                 <!-- ── Wealth Forecast Script ── -->
@@ -332,6 +417,28 @@
                         const contribDisplay = document.getElementById('wf-contrib-display');
                         const totalEl = document.getElementById('wf-total-balance');
                         const ctx = document.getElementById('wf-chart').getContext('2d');
+                        
+                        // Refs for Toast
+                        const chartWrap = document.querySelector('.wf-chart-wrap');
+                        const toastEl = document.getElementById('wf-disclaimer-toast');
+                        const toastCloseBtn = document.querySelector('.wf-toast-close');
+                        let toastTimeout = null;
+
+                        // ── Toast Logic ───────────────────────────────────────
+                        function showToast() {
+                            toastEl.classList.add('show');
+                            if (toastTimeout) clearTimeout(toastTimeout);
+                            // Auto hide after 8 seconds
+                            toastTimeout = setTimeout(() => hideToast(), 8000); 
+                        }
+
+                        function hideToast() {
+                            toastEl.classList.remove('show');
+                            if (toastTimeout) clearTimeout(toastTimeout);
+                        }
+
+                        chartWrap.addEventListener('click', showToast);
+                        toastCloseBtn.addEventListener('click', hideToast);
 
                         // ── Gradient fill ─────────────────────────────────────
                         function makeGradient() {
