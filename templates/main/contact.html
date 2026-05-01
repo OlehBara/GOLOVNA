@@ -23,7 +23,7 @@
             <div class="contact-info">
                 <h2>{% trans "Контактна інформація" %}</h2>
                 <p style="color: var(--text-secondary); margin-bottom: 32px;">
-                    {% trans "Заповніть форму або зв'яжіться з нами напряму" %}
+                    {% trans "Напишіть нам у чат або зв'яжіться з нами напряму" %}
                 </p>
 
                 <div class="contact-item">
@@ -90,32 +90,64 @@
                 </div>
             </div>
 
-            <!-- Contact Form -->
-            <div class="contact-form-wrapper">
-                <form class="contact-form" id="contactForm" method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="name">Ім'я *</label>
-                        <input type="text" id="name" name="name" required>
+            <!-- Inline Chat Widget -->
+            {% if user.is_authenticated %}
+            <div class="contact-chat-inline" id="contactChatPanel"
+                 data-user-id="{{ user.id }}"
+                 data-is-staff="{% if user.is_staff %}1{% else %}0{% endif %}">
+                <div class="contact-chat-header">
+                    <div class="contact-chat-header-main">
+                        <div class="contact-chat-avatar">💬</div>
+                        <div>
+                            <div class="contact-chat-title">
+                                {% if user.is_staff %}{% trans "Панель оператора" %}{% else %}{% trans "Чат з підтримкою" %}{% endif %}
+                            </div>
+                            <div class="contact-chat-subtitle">
+                                {% if user.is_staff %}{% trans "Онлайн-діалоги з користувачами" %}{% else %}{% trans "Ми онлайн, щоб допомогти" %}{% endif %}
+                            </div>
+                            {% if user.is_staff %}
+                            <div class="contact-chat-admin-tabs" id="contactChatAdminTabs"></div>
+                            {% endif %}
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" required>
+                </div>
+                <div class="contact-chat-body">
+                    <div class="contact-chat-messages" id="contactChatMessages"></div>
+                </div>
+                <div class="contact-chat-footer">
+                    <div class="contact-chat-input-wrap">
+                        <input type="text" id="contactChatInput" class="contact-chat-input"
+                            placeholder="{% if user.is_staff %}{% trans 'Відповісти користувачу...' %}{% else %}{% trans 'Напишіть повідомлення...' %}{% endif %}">
+                        <button class="contact-chat-send" id="contactChatSend" aria-label="{% trans 'Надіслати' %}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
                     </div>
-
-                    <div class="form-group">
-                        <label for="message">Повідомлення *</label>
-                        <textarea id="message" name="message" required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%;">Надіслати</button>
-
-                    <div class="success-message" id="successMessage">
-                        ✅ Дякуємо, що звернулися! Ми зв'яжемося з вами найближчим часом.
-                    </div>
-                </form>
+                </div>
             </div>
+            {% else %}
+            <div class="contact-chat-inline contact-chat-login-prompt">
+                <div class="contact-chat-header">
+                    <div class="contact-chat-header-main">
+                        <div class="contact-chat-avatar">💬</div>
+                        <div>
+                            <div class="contact-chat-title">{% trans "Чат з підтримкою" %}</div>
+                            <div class="contact-chat-subtitle">{% trans "Ми онлайн, щоб допомогти" %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-chat-body" style="align-items: center; justify-content: center; padding: 40px 20px; text-align: center;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(148,163,184,0.5)" stroke-width="1.5" style="margin-bottom: 16px;">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <p style="color: #94a3b8; font-size: 15px; margin-bottom: 20px;">{% trans "Увійдіть, щоб розпочати чат з підтримкою" %}</p>
+                    <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block; padding: 12px 32px; text-decoration: none;">{% trans "Увійти" %}</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -134,66 +166,337 @@
 </section>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .contact-chat-inline {
+        border-radius: 20px;
+        background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.96));
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        box-shadow: 0 16px 50px rgba(15, 23, 42, 0.6), 0 0 0 1px rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 480px;
+    }
+    .contact-chat-header {
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        background: linear-gradient(120deg, rgba(15, 23, 42, 0.92), rgba(30, 64, 175, 0.7));
+    }
+    .contact-chat-header-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .contact-chat-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 0 0, #0ea5e9, #1e293b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #e0f2fe;
+        box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.8);
+        flex-shrink: 0;
+    }
+    .contact-chat-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #e2e8f0;
+        white-space: nowrap;
+    }
+    .contact-chat-subtitle {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+    .contact-chat-admin-tabs {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+    .contact-chat-admin-tab {
+        flex-shrink: 0;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: #cbd5f5;
+        cursor: pointer;
+        background: rgba(15, 23, 42, 0.6);
+        max-width: 140px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    .contact-chat-admin-tab.is-active {
+        border-color: rgba(56, 189, 248, 0.9);
+        background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.9), rgba(30, 64, 175, 0.9));
+        color: #0f172a;
+    }
+    .contact-chat-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: radial-gradient(circle at 0 0, rgba(8, 47, 73, 0.9), rgba(15, 23, 42, 0.95));
+        min-height: 0;
+    }
+    .contact-chat-messages {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        padding: 14px 14px 8px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+    }
+    .contact-chat-messages::-webkit-scrollbar { width: 6px; }
+    .contact-chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.8);
+        border-radius: 999px;
+    }
+    .contact-chat-message-row {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 8px;
+    }
+    .contact-chat-message-row.me { align-items: flex-end; }
+    .contact-chat-message-meta {
+        font-size: 10px;
+        color: #64748b;
+        margin-bottom: 2px;
+        max-width: 80%;
+    }
+    .contact-chat-message-bubble {
+        max-width: 80%;
+        padding: 9px 11px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+    .contact-chat-message-row.me .contact-chat-message-bubble {
+        background: linear-gradient(135deg, #22c55e, #0f766e);
+        color: #ecfdf5;
+        border-bottom-right-radius: 4px;
+    }
+    .contact-chat-message-row.them .contact-chat-message-bubble {
+        background: rgba(15, 23, 42, 0.7);
+        color: #e5e7eb;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        border-bottom-left-radius: 4px;
+    }
+    .contact-chat-footer {
+        padding: 10px 10px 12px;
+        border-top: 1px solid rgba(148, 163, 184, 0.35);
+        background: linear-gradient(to top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+    }
+    .contact-chat-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 999px;
+        padding: 4px 4px 4px 12px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+    .contact-chat-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #e5e7eb;
+        font-size: 13px;
+    }
+    .contact-chat-input::placeholder { color: #6b7280; }
+    .contact-chat-send {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        border: none;
+        background: radial-gradient(circle at 0 0, #22c55e, #16a34a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ecfdf5;
+        cursor: pointer;
+        box-shadow: 0 10px 28px rgba(21, 128, 61, 0.7);
+        flex-shrink: 0;
+    }
+    .contact-chat-send:disabled {
+        opacity: 0.4;
+        cursor: default;
+        box-shadow: none;
+    }
+    .contact-chat-send svg { transform: translateX(1px); }
+
+    @media (max-width: 768px) {
+        .contact-chat-inline { height: 400px; }
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const contactForm = document.getElementById('contactForm');
-        const successMessage = document.getElementById('successMessage');
+(function () {
+    const panel = document.getElementById('contactChatPanel');
+    if (!panel) return;
 
-        if (contactForm) {
-            contactForm.addEventListener('submit', function (e) {
-                e.preventDefault();
+    const messagesEl = document.getElementById('contactChatMessages');
+    const inputEl = document.getElementById('contactChatInput');
+    const sendBtn = document.getElementById('contactChatSend');
+    const adminTabs = document.getElementById('contactChatAdminTabs');
 
-                const name = document.getElementById('name').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const message = document.getElementById('message').value.trim();
-                const subjectEl = document.getElementById('subject');
-                const subject = subjectEl ? subjectEl.value.trim() : '';
+    const userId = parseInt(panel.dataset.userId || '0', 10);
+    const isStaff = panel.dataset.isStaff === '1';
 
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Відправляємо...';
-                submitBtn.disabled = true;
+    let socket = null;
+    let reconnectDelay = 1000;
+    let reconnectTimer = null;
+    let activeChatUserId = null;
+    const allMessages = [];
+    const adminUsers = {};
 
-                fetch('{% url "contact_ajax" %}', {
-                    method: 'POST',
-                    body: JSON.stringify({ name, email, subject, message }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            contactForm.reset();
-                            successMessage.style.display = 'block';
-                            setTimeout(() => { successMessage.style.display = 'none'; }, 6000);
-                        } else {
-                            // Show server error inline, not as alert
-                            successMessage.textContent = '⚠️ ' + (data.message || 'Помилка. Спробуйте ще раз.');
-                            successMessage.style.background = 'rgba(239,68,68,0.15)';
-                            successMessage.style.color = '#ef4444';
-                            successMessage.style.display = 'block';
-                            setTimeout(() => {
-                                successMessage.style.display = 'none';
-                                successMessage.textContent = '✅ Дякуємо, що звернулися! Ми зв\'яжемося з вами найближчим часом.';
-                                successMessage.style.background = '';
-                                successMessage.style.color = '';
-                            }, 5000);
-                        }
-                    })
-                    .catch(() => {
-                        successMessage.textContent = '⚠️ Мережева помилка. Перевірте з\'єднання.';
-                        successMessage.style.display = 'block';
-                        setTimeout(() => { successMessage.style.display = 'none'; }, 5000);
-                    })
-                    .finally(() => {
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    });
-            });
+    function scheduleReconnect() {
+        if (reconnectTimer) return;
+        reconnectTimer = setTimeout(function () {
+            reconnectTimer = null;
+            ensureConnection();
+        }, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+    }
+
+    function ensureConnection() {
+        if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = protocol + '://' + window.location.host + '/ws/support/';
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function () {
+            reconnectDelay = 1000;
+            updateSendState();
+        };
+        socket.onclose = function () {
+            updateSendState();
+            scheduleReconnect();
+        };
+        socket.onerror = function () { updateSendState(); };
+        socket.onmessage = function (event) {
+            try { handleIncomingMessage(JSON.parse(event.data)); }
+            catch (e) { console.error('Bad WS message', e); }
+        };
+    }
+
+    function handleIncomingMessage(data) {
+        allMessages.push(data);
+        if (isStaff) {
+            const cid = data.chat_user_id;
+            const cname = data.chat_user_username || ('User #' + cid);
+            if (!adminUsers[cid]) {
+                adminUsers[cid] = { id: cid, username: cname, last: data.message || '' };
+            } else {
+                adminUsers[cid].last = data.message || '';
+            }
+            if (!activeChatUserId) activeChatUserId = cid;
+            renderAdminTabs();
         }
+        renderMessages();
+    }
+
+    function renderAdminTabs() {
+        if (!isStaff || !adminTabs) return;
+        const ids = Object.keys(adminUsers);
+        if (!ids.length) { adminTabs.innerHTML = ''; return; }
+        if (!activeChatUserId || !adminUsers[activeChatUserId]) activeChatUserId = parseInt(ids[0], 10);
+        adminTabs.innerHTML = '';
+        ids.map(function (id) { return adminUsers[id]; })
+           .sort(function (a, b) { return a.username.localeCompare(b.username); })
+           .forEach(function (u) {
+               const tab = document.createElement('button');
+               tab.type = 'button';
+               tab.className = 'contact-chat-admin-tab' + (u.id === activeChatUserId ? ' is-active' : '');
+               tab.textContent = u.username;
+               tab.addEventListener('click', function () {
+                   activeChatUserId = u.id;
+                   renderAdminTabs();
+                   renderMessages();
+               });
+               adminTabs.appendChild(tab);
+           });
+    }
+
+    function renderMessages() {
+        if (!messagesEl) return;
+        messagesEl.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        const visible = allMessages.filter(function (m) {
+            if (!isStaff) return m.chat_user_id === userId;
+            return activeChatUserId ? m.chat_user_id === activeChatUserId : false;
+        });
+        visible.forEach(function (m) {
+            const row = document.createElement('div');
+            const isMe = m.sender_id === userId;
+            row.className = 'contact-chat-message-row ' + (isMe ? 'me' : 'them');
+            const meta = document.createElement('div');
+            meta.className = 'contact-chat-message-meta';
+            meta.textContent = isStaff ? (isMe ? 'Ви (адмін)' : m.chat_user_username || 'Користувач') : (isMe ? 'Я' : 'Підтримка');
+            const bubble = document.createElement('div');
+            bubble.className = 'contact-chat-message-bubble';
+            bubble.textContent = m.message;
+            row.appendChild(meta);
+            row.appendChild(bubble);
+            fragment.appendChild(row);
+        });
+        if (!visible.length) {
+            const empty = document.createElement('div');
+            empty.className = 'contact-chat-message-row them';
+            const bubble = document.createElement('div');
+            bubble.className = 'contact-chat-message-bubble';
+            bubble.textContent = isStaff
+                ? 'Поки що немає активних повідомлень від користувачів.'
+                : 'Поставте своє запитання, і ми відповімо вам тут.';
+            empty.appendChild(bubble);
+            fragment.appendChild(empty);
+        }
+        messagesEl.appendChild(fragment);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function updateSendState() {
+        if (!sendBtn) return;
+        sendBtn.disabled = !(socket && socket.readyState === WebSocket.OPEN);
+    }
+
+    function sendMessage() {
+        if (!socket || socket.readyState !== WebSocket.OPEN) return;
+        const text = (inputEl.value || '').trim();
+        if (!text) return;
+        const payload = { message: text };
+        if (isStaff && activeChatUserId) payload.target_user_id = activeChatUserId;
+        socket.send(JSON.stringify(payload));
+        inputEl.value = '';
+    }
+
+    sendBtn.addEventListener('click', function (e) { e.preventDefault(); sendMessage(); });
+    inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
+
+    // Auto-connect on page load
+    ensureConnection();
+    renderMessages();
+})();
 </script>
 {% endblock %}
