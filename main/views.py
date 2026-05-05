@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal
 from pathlib import Path
-
+from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
@@ -21,8 +21,8 @@ from django.views.decorators.http import require_http_methods
 # from django.contrib.auth.forms import UserCreationForm # Replaced by custom form
 from .forms import ProfileUpdateForm, UserRegistrationForm, UserUpdateForm
 from .models import (
-    CartItem, ContactMessage, Course, Enrollment,
-    LessonProgress, Review, StudentVerification, SubscriptionPlan,
+    BlogPost, CartItem, Certificate, ContactMessage, Course, Enrollment,
+    LessonProgress, Notification, Review, StudentVerification, SubscriptionPlan,
     UserSubscription,
 )
 
@@ -125,6 +125,69 @@ def profile_view(request):
         is_premium=True,
     ).exclude(id__in=enrolled_course_ids) if has_subscription_access else Course.objects.none()
 
+    # ── Progress Dashboard ────────────────────────────
+    TOTAL_LESSONS_PER_COURSE = 4  # кожен курс має 4 уроки
+    
+    # Обчислення прогресу для кожного курсу
+    for enrollment in user_courses:
+        completed_lessons = LessonProgress.objects.filter(
+            user=request.user,
+            course=enrollment.course,
+            status="completed"
+        ).count()
+        enrollment.progress_percent = min(
+            round((completed_lessons / TOTAL_LESSONS_PER_COURSE) * 100), 100
+        )
+        enrollment.completed_lessons = completed_lessons
+        if completed_lessons == 0:
+            enrollment.progress_label = "Не розпочато"
+        elif completed_lessons < TOTAL_LESSONS_PER_COURSE:
+            enrollment.progress_label = f"Урок {completed_lessons} з {TOTAL_LESSONS_PER_COURSE}"
+        else:
+            enrollment.progress_label = "Завершено!"
+
+    # Загальна статистика
+    total_completed_lessons = LessonProgress.objects.filter(
+        user=request.user, status="completed"
+    ).count()
+    total_completed_courses = completed_courses.count()
+
+    # Get all lesson completions for the user to process in memory (fixes SQLite timezone __date issues)
+    
+    now = timezone.localtime()
+    today = now.date()
+    
+    completions = LessonProgress.objects.filter(
+        user=request.user, 
+        status="completed"
+    ).values_list('completed_at', flat=True)
+    
+    activity_dates = set(timezone.localtime(dt).date() for dt in completions)
+
+    # Streak: кількість послідовних днів з активністю
+    streak = 0
+    check_date = today
+    
+    # If no activity today, check if there was activity yesterday to maintain the streak
+    if check_date not in activity_dates and (check_date - timedelta(days=1)) in activity_dates:
+        check_date = check_date - timedelta(days=1)
+        
+    while check_date in activity_dates:
+        streak += 1
+        check_date -= timedelta(days=1)
+
+    # Активність за тиждень (7 днів)
+    weekly_activity = []
+    day_names = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"]
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        count = sum(1 for dt in completions if timezone.localtime(dt).date() == d)
+        weekly_activity.append({
+            "day": day_names[d.weekday()],
+            "count": count,
+            "date": d.strftime("%d.%m"),
+        })
+
     context = {
         "display_name": request.user.username,
         "display_email": request.user.email,
@@ -134,6 +197,11 @@ def profile_view(request):
         "owned_subscription": owned_subscription,
         "shared_subscription": shared_subscription,
         "subscription_courses": subscription_courses,
+        # Dashboard data
+        "total_completed_lessons": total_completed_lessons,
+        "total_completed_courses": total_completed_courses,
+        "streak": streak,
+        "weekly_activity": weekly_activity,
     }
     context["my_subscriptions"] = UserSubscription.objects.filter(
         owner=request.user, is_active=True, end_date__gt=timezone.now()
@@ -1152,3 +1220,439 @@ def subscribe(request, plan_id):
 
     messages.success(request, f"Підписку «{plan.get_name_display()}» додано до кошика!")
     return redirect("cart_detail")
+
+
+# ── Notification API ──────────────────────────────────────────────
+
+@login_required
+def notifications_api(request):
+    """GET: повертає список сповіщень для поточного користувача."""
+    from django.utils.timesince import timesince
+    notifs = Notification.objects.filter(user=request.user)[:20]
+    data = []
+    for n in notifs:
+        data.append({
+            "id": n.id,
+            "message": n.message,
+            "type": n.notification_type,
+            "is_read": n.is_read,
+            "link": n.link,
+            "time_ago": timesince(n.created_at) + " тому",
+        })
+    return JsonResponse({"notifications": data})
+
+
+@login_required
+@require_http_methods(["POST"])
+def mark_notification_read(request, notification_id):
+    """POST: позначити сповіщення як прочитане."""
+    Notification.objects.filter(id=notification_id, user=request.user).update(is_read=True)
+    return JsonResponse({"success": True})
+
+
+@login_required
+@require_http_methods(["POST"])
+def mark_all_notifications_read(request):
+    """POST: позначити всі сповіщення як прочитані."""
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({"success": True})
+
+
+# ── Financial Quiz ────────────────────────────────────────────────
+
+QUIZ_QUESTIONS = [
+    {
+        "id": 1,
+        "question": "Що таке інфляція?",
+        "options": [
+            "Зростання вартості валюти",
+            "Зниження купівельної спроможності грошей",
+            "Збільшення доходів населення",
+            "Зростання ВВП країни"
+        ],
+        "correct": 1,
+        "category": "general"
+    },
+    {
+        "id": 2,
+        "question": "Яке 'золоте правило' бюджетування найпопулярніше?",
+        "options": [
+            "80/20",
+            "50/30/20",
+            "70/30",
+            "60/40"
+        ],
+        "correct": 1,
+        "category": "budgeting"
+    },
+    {
+        "id": 3,
+        "question": "Що таке диверсифікація інвестицій?",
+        "options": [
+            "Вкладання всіх грошей в одну компанію",
+            "Розподіл коштів між різними активами для зменшення ризику",
+            "Інвестування лише в державні облігації",
+            "Тримання грошей у готівці"
+        ],
+        "correct": 1,
+        "category": "investing"
+    },
+    {
+        "id": 4,
+        "question": "Що таке 'фінансова подушка безпеки'?",
+        "options": [
+            "Страховий поліс",
+            "Банківський кредит на екстрений випадок",
+            "Резерв грошей на 3-6 місяців витрат",
+            "Депозит на пенсію"
+        ],
+        "correct": 2,
+        "category": "budgeting"
+    },
+    {
+        "id": 5,
+        "question": "Що таке складний відсоток (compound interest)?",
+        "options": [
+            "Відсоток, який нараховується тільки на початкову суму",
+            "Відсоток, який нараховується на суму + раніше нараховані відсотки",
+            "Фіксований відсоток банку",
+            "Штрафний відсоток за прострочення"
+        ],
+        "correct": 1,
+        "category": "investing"
+    },
+    {
+        "id": 6,
+        "question": "Яка мінімальна кількість джерел доходу рекомендується для фінансової стабільності?",
+        "options": [
+            "1 — стабільна робота",
+            "2-3 різних джерела",
+            "5 і більше",
+            "Це не має значення"
+        ],
+        "correct": 1,
+        "category": "general"
+    },
+    {
+        "id": 7,
+        "question": "Що таке ETF?",
+        "options": [
+            "Електронний торговий фонд",
+            "Біржовий інвестиційний фонд",
+            "Європейський трастовий фонд",
+            "Електронна торгова платформа"
+        ],
+        "correct": 1,
+        "category": "investing"
+    },
+    {
+        "id": 8,
+        "question": "Що НЕ є ознакою фінансової піраміди?",
+        "options": [
+            "Обіцянка дуже високого прибутку без ризику",
+            "Прозора звітність та ліцензія регулятора",
+            "Виплати старим учасникам за рахунок нових",
+            "Тиск 'інвестуйте зараз або пізно'"
+        ],
+        "correct": 1,
+        "category": "credit"
+    },
+    {
+        "id": 9,
+        "question": "Який оптимальний відсоток доходу рекомендують відкладати?",
+        "options": [
+            "1-5%",
+            "10-20%",
+            "50%",
+            "Все, що залишилося"
+        ],
+        "correct": 1,
+        "category": "budgeting"
+    },
+    {
+        "id": 10,
+        "question": "Що таке ліквідність активу?",
+        "options": [
+            "Його прибутковість",
+            "Здатність швидко перетворити в гроші без значних втрат",
+            "Захищеність від інфляції",
+            "Стабільність ціни"
+        ],
+        "correct": 1,
+        "category": "investing"
+    },
+]
+
+
+def quiz_view(request):
+    """Сторінка фінансового квізу."""
+    return render(request, "main/quiz.html", {"questions_json": json.dumps(QUIZ_QUESTIONS, ensure_ascii=False)})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def quiz_result_api(request):
+    """POST: обчислити результат квізу та рекомендувати курси."""
+    try:
+        data = json.loads(request.body)
+        answers = data.get("answers", {})
+        
+        score = 0
+        category_scores = {}
+        
+        for q in QUIZ_QUESTIONS:
+            qid = str(q["id"])
+            cat = q["category"]
+            if cat not in category_scores:
+                category_scores[cat] = {"correct": 0, "total": 0}
+            category_scores[cat]["total"] += 1
+            
+            if qid in answers and answers[qid] == q["correct"]:
+                score += 1
+                category_scores[cat]["correct"] += 1
+        
+        total = len(QUIZ_QUESTIONS)
+        percentage = round((score / total) * 100) if total else 0
+        
+        if percentage >= 80:
+            level = "expert"
+            level_name = "Фінансовий експерт"
+            level_emoji = "🏆"
+            description = "Вітаємо! Ви маєте відмінні знання з фінансової грамотності."
+        elif percentage >= 50:
+            level = "intermediate"
+            level_name = "Знавець фінансів"
+            level_emoji = "📈"
+            description = "Непогано! Ви маєте базові знання, але є що покращити."
+        else:
+            level = "beginner"
+            level_name = "Початківець"
+            level_emoji = "📚"
+            description = "Не хвилюйтесь! Наші курси допоможуть вам стати фінансово грамотним."
+        
+        # Find weak categories for recommendations
+        weak_cats = []
+        for cat, scores in category_scores.items():
+            if scores["total"] > 0 and (scores["correct"] / scores["total"]) < 0.6:
+                weak_cats.append(cat)
+        
+        recommended_courses = list(
+            Course.objects.filter(is_active=True, category__in=weak_cats if weak_cats else ["budgeting", "investing"])
+            .values("id", "title", "category", "is_premium")[:4]
+        )
+        
+        return JsonResponse({
+            "success": True,
+            "score": score,
+            "total": total,
+            "percentage": percentage,
+            "level": level,
+            "level_name": level_name,
+            "level_emoji": level_emoji,
+            "description": description,
+            "recommended_courses": recommended_courses,
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=400)
+
+
+# ══════════════════════════════════════════════════════════════════
+# CERTIFICATE PDF GENERATION
+# ══════════════════════════════════════════════════════════════════
+
+@login_required
+def download_certificate(request, course_id):
+    """Generate and download a beautiful PDF certificate."""
+    enrollment = get_object_or_404(
+        Enrollment, user=request.user, course_id=course_id, is_completed=True
+    )
+
+    # Get or create certificate record
+    cert, _ = Certificate.objects.get_or_create(
+        user=request.user,
+        course=enrollment.course,
+    )
+
+    import io
+    import qrcode
+    from reportlab.lib.pagesizes import landscape, A4
+    from reportlab.lib.units import mm, cm
+    from reportlab.lib.colors import HexColor
+    from reportlab.pdfgen import canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    buf = io.BytesIO()
+    width, height = landscape(A4)
+    c = canvas.Canvas(buf, pagesize=landscape(A4))
+
+    # ── Background ──
+    c.setFillColor(HexColor("#0f172a"))
+    c.rect(0, 0, width, height, fill=1, stroke=0)
+
+    # Decorative gradient strips
+    c.setFillColor(HexColor("#1e3a5f"))
+    c.rect(0, height - 18 * mm, width, 18 * mm, fill=1, stroke=0)
+    c.setFillColor(HexColor("#1e3a5f"))
+    c.rect(0, 0, width, 18 * mm, fill=1, stroke=0)
+
+    # Gold accent lines
+    c.setStrokeColor(HexColor("#f59e0b"))
+    c.setLineWidth(2)
+    c.line(20 * mm, height - 22 * mm, width - 20 * mm, height - 22 * mm)
+    c.line(20 * mm, 22 * mm, width - 20 * mm, 22 * mm)
+
+    # Thin inner border
+    c.setStrokeColor(HexColor("#334155"))
+    c.setLineWidth(0.5)
+    c.roundRect(15 * mm, 15 * mm, width - 30 * mm, height - 30 * mm, 5 * mm)
+
+    # ── Logo area (top center) ──
+    c.setFillColor(HexColor("#4a8fd5"))
+    cx = width / 2
+    c.circle(cx, height - 38 * mm, 12 * mm, fill=1, stroke=0)
+    # Bars inside the circle (FinSmart logo)
+    c.setFillColor(HexColor("#ffffff"))
+    c.rect(cx - 7 * mm, height - 44 * mm, 3 * mm, 12 * mm, fill=1, stroke=0)
+    c.rect(cx - 1.5 * mm, height - 48 * mm, 3 * mm, 16 * mm, fill=1, stroke=0)
+    c.rect(cx + 4 * mm, height - 46 * mm, 3 * mm, 14 * mm, fill=1, stroke=0)
+
+    # ── "CERTIFICATE" title ──
+    c.setFillColor(HexColor("#f59e0b"))
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(cx, height - 60 * mm, "СЕРТИФІКАТ")
+
+    c.setFillColor(HexColor("#94a3b8"))
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(cx, height - 67 * mm, "про успішне проходження курсу")
+
+    # ── Student Name ──
+    full_name = request.user.get_full_name() or request.user.username
+    c.setFillColor(HexColor("#ffffff"))
+    c.setFont("Helvetica-Bold", 28)
+    c.drawCentredString(cx, height - 90 * mm, full_name)
+
+    # Decorative line under name
+    name_w = c.stringWidth(full_name, "Helvetica-Bold", 28)
+    c.setStrokeColor(HexColor("#f59e0b"))
+    c.setLineWidth(1)
+    c.line(cx - name_w / 2 - 10, height - 94 * mm, cx + name_w / 2 + 10, height - 94 * mm)
+
+    # ── Course Title ──
+    c.setFillColor(HexColor("#94a3b8"))
+    c.setFont("Helvetica", 11)
+    c.drawCentredString(cx, height - 105 * mm, "успішно завершив(ла) онлайн-курс")
+
+    c.setFillColor(HexColor("#4a8fd5"))
+    c.setFont("Helvetica-Bold", 20)
+    course_title = enrollment.course.title
+    # Truncate long titles
+    if len(course_title) > 50:
+        course_title = course_title[:47] + "..."
+    c.drawCentredString(cx, height - 118 * mm, f"«{course_title}»")
+
+    # ── Platform name ──
+    c.setFillColor(HexColor("#64748b"))
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(cx, height - 130 * mm, "на платформі FinSmart — Система рекомендацій з фінансової грамотності")
+
+    # ── Date and ID ──
+    completion_date = enrollment.completion_date or cert.issued_at
+    date_str = completion_date.strftime("%d.%m.%Y")
+
+    c.setFillColor(HexColor("#94a3b8"))
+    c.setFont("Helvetica", 9)
+    c.drawString(25 * mm, 30 * mm, f"Дата видачі: {date_str}")
+    c.drawString(25 * mm, 25 * mm, f"ID: {str(cert.verification_code)[:8].upper()}")
+
+    # ── QR Code ──
+    verify_url = request.build_absolute_uri(f"/certificate/verify/{cert.verification_code}/")
+    qr = qrcode.QRCode(version=1, box_size=10, border=1)
+    qr.add_data(verify_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#4a8fd5", back_color="#0f172a")
+
+    qr_buf = io.BytesIO()
+    qr_img.save(qr_buf, format="PNG")
+    qr_buf.seek(0)
+
+    from reportlab.lib.utils import ImageReader
+    qr_reader = ImageReader(qr_buf)
+    qr_size = 28 * mm
+    c.drawImage(qr_reader, width - 25 * mm - qr_size, 23 * mm, qr_size, qr_size)
+
+    c.setFillColor(HexColor("#64748b"))
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(width - 25 * mm - qr_size / 2, 21 * mm, "Скануй для верифікації")
+
+    # ── FinSmart signature ──
+    c.setFillColor(HexColor("#ffffff"))
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(cx, 35 * mm, "FinSmart Team")
+    c.setStrokeColor(HexColor("#f59e0b"))
+    c.setLineWidth(0.5)
+    sig_w = c.stringWidth("FinSmart Team", "Helvetica-Bold", 11)
+    c.line(cx - sig_w / 2 - 5, 33 * mm, cx + sig_w / 2 + 5, 33 * mm)
+    c.setFillColor(HexColor("#64748b"))
+    c.setFont("Helvetica", 8)
+    c.drawCentredString(cx, 28 * mm, "Директор платформи")
+
+    c.showPage()
+    c.save()
+    buf.seek(0)
+
+    safe_title = slugify(enrollment.course.title) or "course"
+    filename = f"FinSmart_Certificate_{safe_title}.pdf"
+
+    from django.http import HttpResponse
+    response = HttpResponse(buf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+def verify_certificate(request, code):
+    """Public page to verify a certificate by its UUID code."""
+    try:
+        cert = Certificate.objects.select_related("user", "course").get(verification_code=code)
+        return render(request, "main/certificate_verify.html", {"cert": cert})
+    except Certificate.DoesNotExist:
+        return render(request, "main/certificate_verify.html", {"cert": None})
+
+
+# ══════════════════════════════════════════════════════════════════
+# BLOG
+# ══════════════════════════════════════════════════════════════════
+
+def blog_list(request):
+    """Blog listing page with category filter."""
+    category = request.GET.get("category", "")
+    posts = BlogPost.objects.filter(is_published=True)
+
+    if category:
+        posts = posts.filter(category=category)
+
+    categories = BlogPost.CATEGORY_CHOICES
+    return render(request, "main/blog.html", {
+        "posts": posts,
+        "categories": categories,
+        "current_category": category,
+    })
+
+
+def blog_detail(request, slug):
+    """Blog post detail page."""
+    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    # Increment views
+    BlogPost.objects.filter(pk=post.pk).update(views_count=models.F("views_count") + 1)
+    post.refresh_from_db()
+
+    # Related posts
+    related = (
+        BlogPost.objects.filter(is_published=True, category=post.category)
+        .exclude(pk=post.pk)[:3]
+    )
+
+    return render(request, "main/blog_detail.html", {
+        "post": post,
+        "related_posts": related,
+    })

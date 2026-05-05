@@ -81,6 +81,19 @@
 <!-- Courses Section -->
 <section class="courses-section">
     <div class="container">
+        <!-- Skeleton loading -->
+        <div class="courses-grid skeleton-container" id="coursesSkeleton">
+            <div class="skeleton-card"><div class="skeleton-circle"></div><div class="skeleton-text h-20 w-60"></div><div class="skeleton-text w-80"></div><div class="skeleton-text w-40"></div><div class="skeleton-row"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-circle"></div><div class="skeleton-text h-20 w-60"></div><div class="skeleton-text w-80"></div><div class="skeleton-text w-40"></div><div class="skeleton-row"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-circle"></div><div class="skeleton-text h-20 w-60"></div><div class="skeleton-text w-80"></div><div class="skeleton-text w-40"></div><div class="skeleton-row"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+        </div>
+        <script>
+            window.addEventListener('DOMContentLoaded', function() {
+                const sk = document.getElementById('coursesSkeleton');
+                if (sk) { sk.style.transition = 'opacity .3s'; sk.style.opacity = '0'; setTimeout(() => sk.style.display = 'none', 350); }
+            });
+        </script>
+
         <div class="courses-grid">
             {% for course in courses %}
             <div class="course-card animate-on-scroll" data-category="{{ course.category }}">

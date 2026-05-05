@@ -299,6 +299,22 @@
         </div>
     </div>
 </section>
+<!-- Quiz CTA Banner -->
+<section style="padding: 60px 0;">
+    <div class="container">
+        <div class="animate-on-scroll" style="background: linear-gradient(135deg, #1a0533 0%, #4a0e8f 50%, #6c22b8 100%); border-radius: 24px; padding: 48px 40px; display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(168,85,247,.3), transparent 70%); pointer-events: none;"></div>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 42px; margin-bottom: 8px;">🧠</div>
+                <h3 style="font-size: clamp(22px, 3vw, 30px); font-weight: 900; color: #fff; margin: 0 0 10px; line-height: 1.25;">Перевір свою фінансову грамотність</h3>
+                <p style="font-size: 16px; color: rgba(255,255,255,.7); max-width: 420px; margin: 0; line-height: 1.6;">Пройди короткий квіз з 10 запитань та отримай персональні рекомендації курсів для розвитку</p>
+            </div>
+            <a href="{% url 'quiz' %}" style="position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 10px; padding: 18px 40px; background: linear-gradient(135deg, #a855f7, #c084fc); color: #fff; text-decoration: none; border-radius: 50px; font-size: 17px; font-weight: 800; box-shadow: 0 10px 40px rgba(168,85,247,.5); transition: transform .2s, box-shadow .2s; white-space: nowrap;">
+                Почати квіз →
+            </a>
+        </div>
+    </div>
+</section>
 
 <!-- Plans & Pricing Section -->
 <section class="pricing-section" id="pricing" style="padding: 80px 0;">

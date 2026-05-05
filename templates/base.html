@@ -45,6 +45,10 @@
                         class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">{% trans "Головна" %}</a>
                     <a href="{% url 'courses' %}"
                         class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">{% trans "Курси" %}</a>
+                    <a href="{% url 'quiz' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'quiz' %}active{% endif %}">{% trans "Квіз" %}</a>
+                    <a href="{% url 'blog' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'blog' or request.resolver_match.url_name == 'blog_detail' %}active{% endif %}">{% trans "Блог" %}</a>
                     <a href="{% url 'about' %}"
                         class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">{% trans "Про нас" %}</a>
                     <a href="{% url 'contact' %}"
@@ -114,6 +118,27 @@
                     </div>
                     {% endif %}
 
+                    {% if user.is_authenticated %}
+                    <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="notif-badge" id="notifBadge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-header">
+                                <span>Сповіщення</span>
+                                <button onclick="markAllRead(event)" style="background:none;border:none;color:var(--brand-primary);font-size:12px;font-weight:600;cursor:pointer;">Прочитати все</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="notif-empty">Завантаження...</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <a href="{% url 'cart_detail' %}" class="cart-btn"
                         style="position: relative; text-decoration: none; color: var(--text-primary); transition: color 0.3s ease; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -145,6 +170,10 @@
                 class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Головна</a>
             <a href="{% url 'courses' %}"
                 class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">Курси</a>
+            <a href="{% url 'quiz' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'quiz' %}active{% endif %}">Квіз</a>
+            <a href="{% url 'blog' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">Блог</a>
             <a href="{% url 'about' %}"
                 class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">Про нас</a>
             <a href="{% url 'contact' %}"
@@ -202,6 +231,18 @@
     </script>
     {% endif %}
 
+
+    <!-- Global Reading Progress Bar -->
+    <div class="reading-progress" id="readingProgress"></div>
+    <script>
+    window.addEventListener('scroll', function() {
+        var h = document.documentElement, b = document.body;
+        var st = h.scrollTop || b.scrollTop;
+        var sh = (h.scrollHeight || b.scrollHeight) - h.clientHeight;
+        var pct = sh > 0 ? (st / sh) * 100 : 0;
+        document.getElementById('readingProgress').style.width = pct + '%';
+    });
+    </script>
 
     <!-- Main Content -->
     <main>
@@ -285,6 +326,51 @@
 
 
     <script src="{% static 'js/main.js' %}"></script>
+    {% if user.is_authenticated %}
+    <script>
+    function toggleNotifDropdown() {
+        const dd = document.getElementById('notifDropdown');
+        dd.classList.toggle('show');
+        if (dd.classList.contains('show')) loadNotifications();
+    }
+    document.addEventListener('click', function(e) {
+        const bell = document.getElementById('notifBell');
+        if (bell && !bell.contains(e.target)) {
+            document.getElementById('notifDropdown').classList.remove('show');
+        }
+    });
+    function loadNotifications() {
+        fetch('/api/notifications/')
+            .then(r => r.json())
+            .then(data => {
+                const list = document.getElementById('notifList');
+                if (!data.notifications || data.notifications.length === 0) {
+                    list.innerHTML = '<div class="notif-empty">🔔 Немає нових сповіщень</div>';
+                    return;
+                }
+                list.innerHTML = data.notifications.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="readNotif(${n.id}, '${n.link}')">
+                        <div class="notif-icon ${n.type}">${{info:'ℹ️',success:'✅',warning:'⚠️'}[n.type] || 'ℹ️'}</div>
+                        <div><div class="notif-text">${n.message}</div><div class="notif-time">${n.time_ago}</div></div>
+                    </div>
+                `).join('');
+            });
+    }
+    function readNotif(id, link) {
+        fetch('/api/notifications/read/' + id + '/', {method:'POST', headers:{'X-CSRFToken': document.cookie.split('csrftoken=')[1]?.split(';')[0] || ''}})
+            .then(() => { if (link) window.location.href = link; });
+    }
+    function markAllRead(e) {
+        e.stopPropagation();
+        fetch('/api/notifications/read-all/', {method:'POST', headers:{'X-CSRFToken': document.cookie.split('csrftoken=')[1]?.split(';')[0] || ''}})
+            .then(() => {
+                document.getElementById('notifList').innerHTML = '<div class="notif-empty">🔔 Немає нових сповіщень</div>';
+                const badge = document.getElementById('notifBadge');
+                if (badge) badge.style.display = 'none';
+            });
+    }
+    </script>
+    {% endif %}
     <!-- Toastify.js -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>

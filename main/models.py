@@ -281,6 +281,98 @@ class StudentVerification(models.Model):
         return f"{self.user.username} – {self.get_status_display()}"
 
 
+# ── Notification System ──────────────────────────────────────────
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ("info", "Інформація"),
+        ("success", "Успіх"),
+        ("warning", "Попередження"),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
+    message = models.TextField()
+    notification_type = models.CharField(
+        max_length=20, choices=TYPE_CHOICES, default="info"
+    )
+    is_read = models.BooleanField(default=False)
+    link = models.CharField(max_length=255, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = "main_notification"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username}: {self.message[:50]}"
+
+
+# ── Blog System ──────────────────────────────────────────────────
+
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = [
+        ("savings", "Заощадження"),
+        ("investing", "Інвестиції"),
+        ("budgeting", "Бюджетування"),
+        ("credit", "Кредити"),
+        ("tips", "Поради"),
+    ]
+
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    excerpt = models.TextField(max_length=500, help_text="Короткий опис для картки")
+    content = models.TextField(help_text="Повний текст статті (HTML)")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="tips")
+    cover_emoji = models.CharField(max_length=10, default="📰", help_text="Емодзі для обкладинки")
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="blog_posts"
+    )
+    is_published = models.BooleanField(default=True)
+    views_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = "main_blogpost"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def reading_time(self):
+        """Estimated reading time in minutes"""
+        word_count = len(self.content.split())
+        return max(1, round(word_count / 200))
+
+
+# ── Certificate System ───────────────────────────────────────────
+
+import uuid
+
+class Certificate(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="certificates"
+    )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="certificates"
+    )
+    verification_code = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    issued_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = "main_certificate"
+        unique_together = ("user", "course")
+
+    def __str__(self):
+        return f"Certificate: {self.user.username} – {self.course.title}"
+
+
 # ── Signals ───────────────────────────────────────────────────────
 
 from django.contrib.auth.models import User as AuthUser
@@ -319,3 +411,24 @@ def notify_student_approved(sender, instance, **kwargs):
             )
         except Exception:
             pass
+
+@receiver(post_save, sender=Enrollment)
+def notify_course_completed(sender, instance, **kwargs):
+    if getattr(instance, 'is_completed', False):
+        if not Notification.objects.filter(user=instance.user, message__icontains=instance.course.title).exists():
+            Notification.objects.create(
+                user=instance.user,
+                message=f'Вітаємо! Ви успішно завершили курс "{instance.course.title}".',
+                notification_type='success',
+                link=f'/course/{instance.course.id}/'
+            )
+
+@receiver(post_save, sender=UserSubscription)
+def notify_subscription_created(sender, instance, created, **kwargs):
+    if created and getattr(instance, 'plan', None):
+        Notification.objects.create(
+            user=instance.owner,
+            message=f'Ваша підписка "{instance.plan.get_name_display()}" успішно активована!',
+            notification_type='success',
+            link='/profile/'
+        )

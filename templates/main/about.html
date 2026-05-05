@@ -32,24 +32,64 @@
         </div>
 
         <!-- Stats Section -->
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsGrid">
             <div class="stat-card animate-on-scroll">
-                <div class="stat-number">{{ stats.total_courses }}+</div>
+                <div class="stat-number" data-target="{{ stats.total_courses }}" data-suffix="+">0</div>
                 <div class="stat-label">{% trans "Освітніх курсів" %}</div>
             </div>
 
             <div class="stat-card animate-on-scroll">
-                <div class="stat-number">{{ stats.total_reviews }}+</div>
+                <div class="stat-number" data-target="{{ stats.total_reviews }}" data-suffix="+">0</div>
                 <div class="stat-label">{% trans "Відгуків студентів" %}</div>
             </div>
 
             <div class="stat-card animate-on-scroll">
-                <div class="stat-number">{{ stats.satisfaction_rate }}%</div>
+                <div class="stat-number" data-target="{{ stats.satisfaction_rate }}" data-suffix="%">0</div>
                 <div class="stat-label">{% trans "Задоволених студентів" %}</div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+(function() {
+    const counters = document.querySelectorAll('#statsGrid .stat-number[data-target]');
+    let animated = false;
+
+    function animateCounters() {
+        if (animated) return;
+        animated = true;
+        counters.forEach(el => {
+            const target = parseInt(el.dataset.target, 10);
+            const suffix = el.dataset.suffix || '';
+            const duration = 2000;
+            const start = performance.now();
+
+            function tick(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                const value = Math.round(target * ease);
+                el.textContent = value + suffix;
+                if (progress < 1) requestAnimationFrame(tick);
+                else el.textContent = target + suffix;
+            }
+            requestAnimationFrame(tick);
+        });
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounters();
+                observer.disconnect();
+            }
+        });
+    }, { threshold: 0.3 });
+
+    const grid = document.getElementById('statsGrid');
+    if (grid) observer.observe(grid);
+})();
+</script>
 
 <!-- Mission and Values -->
 <section class="advantages">

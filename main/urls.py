@@ -101,4 +101,17 @@ urlpatterns = [
     ),
     
     path("subscriptions/subscribe/<int:plan_id>/", views.subscribe, name="subscribe"),
+    # Quiz
+    path("quiz/", views.quiz_view, name="quiz"),
+    path("api/quiz/result/", views.quiz_result_api, name="quiz_result_api"),
+    # Notifications
+    path("api/notifications/", views.notifications_api, name="notifications_api"),
+    path("api/notifications/read/<int:notification_id>/", views.mark_notification_read, name="mark_notification_read"),
+    path("api/notifications/read-all/", views.mark_all_notifications_read, name="mark_all_notifications_read"),
+    # Certificates
+    path("certificate/download/<int:course_id>/", views.download_certificate, name="download_certificate"),
+    path("certificate/verify/<uuid:code>/", views.verify_certificate, name="verify_certificate"),
+    # Blog
+    path("blog/", views.blog_list, name="blog"),
+    path("blog/<slug:slug>/", views.blog_detail, name="blog_detail"),
 ]

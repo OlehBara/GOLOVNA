@@ -1,4 +1,4 @@
-from .models import CartItem
+from .models import CartItem, Notification
 
 
 def cart_count(request):
@@ -13,3 +13,10 @@ def cart_count(request):
         count = CartItem.objects.filter(session_key=session_key).count()
 
     return {"cart_item_count": count}
+
+
+def notifications_count(request):
+    count = 0
+    if request.user.is_authenticated:
+        count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return {"unread_notifications_count": count}
