@@ -206,3 +206,11 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Custom test runner for unmanaged models
 TEST_RUNNER = 'main.test_runner.ManagedModelTestRunner'
+
+# Дозволяємо Django приймати запити з твого домену на Render
+CSRF_TRUSTED_ORIGINS = [
+    "https://finsmart-s9ty.onrender.com",
+]
+
+# Для безпеки на сервері
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
