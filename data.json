@@ -1,0 +1,701 @@
+[
+{
+  "model": "main.course",
+  "pk": 1,
+  "fields": {
+    "title": "Основи бюджетування",
+    "description": "Опануйте мистецтво управління особистими фінансами: плануйте бюджет, скорочуйте зайві витрати та формуйте подушку безпеки за перевіреними методами.",
+    "category": "budgeting",
+    "rating": "4.9",
+    "is_active": true,
+    "price": "799.00",
+    "is_premium": true,
+    "created_at": "2026-03-27T21:40:18.110Z",
+    "updated_at": "2026-03-27T21:40:18.110Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 2,
+  "fields": {
+    "title": "Фінансове планування сім'ї",
+    "description": "Навчіться будувати спільний сімейний бюджет, розподіляти витрати між членами родини та разом рухатись до великих фінансових цілей — першого авто, квартири чи освіти дітей.",
+    "category": "general",
+    "rating": "4.8",
+    "is_active": true,
+    "price": "1099.00",
+    "is_premium": true,
+    "created_at": "2026-03-27T21:40:18.117Z",
+    "updated_at": "2026-03-27T21:40:18.117Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 3,
+  "fields": {
+    "title": "Фінансова грамотність для початківців",
+    "description": "Стартовий курс для тих, хто хоче розібратись у фінансах з нуля: від розуміння кредитів та депозитів до перших кроків в інвестиціях та захисту від шахрайства.",
+    "category": "general",
+    "rating": "4.7",
+    "is_active": true,
+    "price": "599.00",
+    "is_premium": true,
+    "created_at": "2026-03-27T21:40:18.123Z",
+    "updated_at": "2026-03-27T21:40:18.123Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 4,
+  "fields": {
+    "title": "Фондовий ринок: що таке акції та як інвестувати",
+    "description": "Дізнайтесь, як працює фондовий ринок, що таке акції та як звичайна людина може почати інвестувати. Безкоштовний вступний урок для новачків.",
+    "category": "investing",
+    "rating": "4.6",
+    "is_active": true,
+    "price": "0.00",
+    "is_premium": false,
+    "created_at": "2026-03-27T21:40:18.127Z",
+    "updated_at": "2026-03-27T21:40:18.127Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 5,
+  "fields": {
+    "title": "Іпотека: як взяти кредит без помилок",
+    "description": "Розберіться в умовах іпотечного кредитування, навчіться порівнювати пропозиції банків та уникати прихованих комісій. Безкоштовний практичний урок.",
+    "category": "credit",
+    "rating": "4.7",
+    "is_active": true,
+    "price": "0.00",
+    "is_premium": false,
+    "created_at": "2026-03-27T21:40:18.136Z",
+    "updated_at": "2026-03-27T21:40:18.136Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 6,
+  "fields": {
+    "title": "Пенсійне планування: як забезпечити себе в майбутньому",
+    "description": "Чи замислювались ви про пенсію у 30? Дізнайтесь про накопичувальні системи, приватні пенсійні фонди та стратегії фінансової незалежності.",
+    "category": "pension",
+    "rating": "4.5",
+    "is_active": true,
+    "price": "0.00",
+    "is_premium": false,
+    "created_at": "2026-03-27T21:40:18.142Z",
+    "updated_at": "2026-03-27T21:40:18.142Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 7,
+  "fields": {
+    "title": "Інфляція: чому ваші гроші «худнуть» і що з цим робити",
+    "description": "Зрозумійте, що таке інфляція, як вона впливає на ваші заощадження та які інструменти допомагають зберегти купівельну спроможність грошей.",
+    "category": "general",
+    "rating": "4.5",
+    "is_active": true,
+    "price": "0.00",
+    "is_premium": false,
+    "created_at": "2026-03-27T21:40:18.148Z",
+    "updated_at": "2026-03-27T21:40:18.148Z"
+  }
+},
+{
+  "model": "main.course",
+  "pk": 8,
+  "fields": {
+    "title": "Фінансові пастки: як захистити свої гроші від шахраїв",
+    "description": "Навчіться розпізнавати фінансові піраміди, фішинг та маніпуляції шахраїв. Реальні кейси та практичні поради, які збережуть ваші кошти.",
+    "category": "general",
+    "rating": "4.9",
+    "is_active": true,
+    "price": "0.00",
+    "is_premium": false,
+    "created_at": "2026-03-27T21:40:18.153Z",
+    "updated_at": "2026-03-27T21:40:18.153Z"
+  }
+},
+{
+  "model": "main.cartitem",
+  "pk": 24,
+  "fields": {
+    "user": 1,
+    "session_key": null,
+    "course": null,
+    "plan": 3,
+    "created_at": "2026-05-05T17:01:33.851Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 1,
+  "fields": {
+    "user": 3,
+    "course": 1,
+    "text": "Після цього курсу я вперше за 5 років почала відкладати гроші щомісяця. Правило 50/30/20 змінило моє ставлення до витрат назавжди. Рекомендую всім, хто хоче нарешті взяти фінанси під контроль!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.476Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 2,
+  "fields": {
+    "user": 1,
+    "course": 1,
+    "text": "Дуже структурований курс. Урок про відстеження витрат відкрив мені очі — виявляється, я витрачав понад 3000 грн на місяць на речі, які мені не потрібні. Дякую FinSmart!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.484Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 3,
+  "fields": {
+    "user": 3,
+    "course": 2,
+    "text": "Ми з чоловіком постійно сварились через гроші. Після першого ж уроку зрозуміли, що нам бракувало простої системи. Тепер ведемо спільний бюджет вже 4 місяці — і жодного конфлікту через витрати!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.491Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 4,
+  "fields": {
+    "user": 1,
+    "course": 2,
+    "text": "Все круто",
+    "rating": 5,
+    "is_approved": false,
+    "created_at": "2026-03-27T21:45:02.500Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 5,
+  "fields": {
+    "user": 3,
+    "course": 3,
+    "text": "Я завжди боялась фінансових тем, бо вони здавались надто складними. Цей курс розкладає все по поличках — простою мовою, без жаргону. Тепер я впевнено спілкуюсь з банківськими менеджерами!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.509Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 6,
+  "fields": {
+    "user": 1,
+    "course": 3,
+    "text": "Урок про шахрайство варто показувати всім батькам і бабусям. Дуже практичний матеріал. А блок про інвестиції мотивував мене відкрити свій перший депозит. Дякую!",
+    "rating": 4,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.517Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 7,
+  "fields": {
+    "user": 3,
+    "course": 4,
+    "text": "Нарешті зрозумів, що таке P/E ratio і навіщо диверсифікація. Відмінний безкоштовний старт для тих, хто хоче почати інвестувати.",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.524Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 8,
+  "fields": {
+    "user": 1,
+    "course": 4,
+    "text": "Доступно пояснені основи фондового ринку. Приємно, що є практичні приклади з українськими реаліями. Коротко, але по суті.",
+    "rating": 4,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.533Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 9,
+  "fields": {
+    "user": 3,
+    "course": 5,
+    "text": "Перед тим як іти до банку, прочитав цей урок — і встиг уникнути кількох пасток з прихованими комісіями. Дуже практичний матеріал!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.542Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 10,
+  "fields": {
+    "user": 1,
+    "course": 5,
+    "text": "Урок пояснює складні речі простою мовою. Тепер знаю різницю між фіксованою та плаваючою ставкою. Дякую FinSmart за безкоштовний доступ!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.550Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 11,
+  "fields": {
+    "user": 3,
+    "course": 6,
+    "text": "Мені 28 і я ніколи не думав про пенсію. Після цього уроку відразу відкрив накопичувальний рахунок. Краще пізно, ніж ніколи... а ще краще — рано!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.558Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 12,
+  "fields": {
+    "user": 1,
+    "course": 6,
+    "text": "Пояснили різницю між солідарною та накопичувальною системою. Нарешті зрозуміла, чому не варто розраховувати лише на державну пенсію.",
+    "rating": 4,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.567Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 13,
+  "fields": {
+    "user": 3,
+    "course": 7,
+    "text": "Урок пояснив мені, чому тримати всі гроші на картці — погана ідея. Тепер частину відкладаю в облігації. Просто та зрозуміло!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.575Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 14,
+  "fields": {
+    "user": 1,
+    "course": 7,
+    "text": "Я думала, що інфляція — це щось абстрактне. Після цього уроку зрозуміла, що це торкається кожного з нас щодня. Дуже наочно!",
+    "rating": 4,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.583Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 15,
+  "fields": {
+    "user": 3,
+    "course": 8,
+    "text": "Батьки ледь не потрапили в піраміду. Після того як я показав їм цей урок — зупинились вчасно. Такий контент треба поширювати якомога ширше. Дякую!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.591Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 16,
+  "fields": {
+    "user": 1,
+    "course": 8,
+    "text": "Розбір реальних схем шахраїв — це те, що потрібно кожному. Тепер знаю, на що звертати увагу при «інвестиційних пропозиціях». Обов'язковий урок!",
+    "rating": 5,
+    "is_approved": true,
+    "created_at": "2026-03-27T21:45:02.599Z"
+  }
+},
+{
+  "model": "main.review",
+  "pk": 17,
+  "fields": {
+    "user": 5,
+    "course": 2,
+    "text": "Все курто",
+    "rating": 5,
+    "is_approved": false,
+    "created_at": "2026-03-30T14:32:40.869Z"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "image": "profile_pics/happy-birthday-linus-torvalds-v0-lpt84i5rdk9e1_IqZ5OLJ.webp"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "image": "profile_pics/happy-birthday-linus-torvalds-v0-lpt84i5rdk9e1.webp"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 3,
+  "fields": {
+    "user": 3,
+    "image": "profile_pics/Zelenskyi-17864.png"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 4,
+  "fields": {
+    "user": 4,
+    "image": "profile_pics/ae999b2b-4991-46dc-9921-fc12c516a05e.jfif"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 5,
+  "fields": {
+    "user": 5,
+    "image": "profile_pics/happy-birthday-linus-torvalds-v0-lpt84i5rdk9e1_9m6u823.webp"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 6,
+  "fields": {
+    "user": 6,
+    "image": "default.jpg"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 7,
+  "fields": {
+    "user": 7,
+    "image": "default.jpg"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 8,
+  "fields": {
+    "user": 8,
+    "image": "default.jpg"
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "course": 4,
+    "enrolled_at": "2026-03-27T21:46:22.959Z",
+    "is_completed": true,
+    "completion_date": "2026-03-27T21:46:42.070Z"
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "course": 2,
+    "enrolled_at": "2026-03-27T21:54:43.766Z",
+    "is_completed": false,
+    "completion_date": null
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 3,
+  "fields": {
+    "user": 1,
+    "course": 5,
+    "enrolled_at": "2026-03-29T17:19:12.873Z",
+    "is_completed": false,
+    "completion_date": null
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 4,
+  "fields": {
+    "user": 1,
+    "course": 2,
+    "enrolled_at": "2026-03-29T18:30:44.492Z",
+    "is_completed": true,
+    "completion_date": "2026-03-30T14:17:39.516Z"
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 5,
+  "fields": {
+    "user": 5,
+    "course": 2,
+    "enrolled_at": "2026-03-30T14:31:48.802Z",
+    "is_completed": true,
+    "completion_date": "2026-03-30T14:32:32.534Z"
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 6,
+  "fields": {
+    "user": 5,
+    "course": 4,
+    "enrolled_at": "2026-03-30T14:33:21.946Z",
+    "is_completed": false,
+    "completion_date": null
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 7,
+  "fields": {
+    "user": 3,
+    "course": 1,
+    "enrolled_at": "2026-05-05T14:35:11.307Z",
+    "is_completed": true,
+    "completion_date": "2026-05-05T14:37:42.737Z"
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 8,
+  "fields": {
+    "user": 3,
+    "course": 2,
+    "enrolled_at": "2026-05-05T14:43:32.047Z",
+    "is_completed": false,
+    "completion_date": null
+  }
+},
+{
+  "model": "main.enrollment",
+  "pk": 9,
+  "fields": {
+    "user": 3,
+    "course": 4,
+    "enrolled_at": "2026-05-05T14:44:36.226Z",
+    "is_completed": true,
+    "completion_date": "2026-05-05T14:44:57.954Z"
+  }
+},
+{
+  "model": "main.lessonprogress",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "course": 2,
+    "lesson_key": "family_4",
+    "status": "completed",
+    "completed_at": "2026-03-30T14:17:39.512Z"
+  }
+},
+{
+  "model": "main.lessonprogress",
+  "pk": 2,
+  "fields": {
+    "user": 5,
+    "course": 2,
+    "lesson_key": "family_4",
+    "status": "completed",
+    "completed_at": "2026-03-30T14:32:32.530Z"
+  }
+},
+{
+  "model": "main.lessonprogress",
+  "pk": 3,
+  "fields": {
+    "user": 3,
+    "course": 1,
+    "lesson_key": "budgeting_4",
+    "status": "completed",
+    "completed_at": "2026-05-05T14:37:42.735Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 1,
+  "fields": {
+    "sender": 2,
+    "chat_user": 2,
+    "message": "привіт",
+    "is_admin_reply": false,
+    "timestamp": "2026-03-27T20:41:41.545Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 2,
+  "fields": {
+    "sender": 3,
+    "chat_user": 2,
+    "message": "що таке",
+    "is_admin_reply": true,
+    "timestamp": "2026-03-27T20:46:24.769Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 3,
+  "fields": {
+    "sender": 4,
+    "chat_user": 4,
+    "message": "qqw",
+    "is_admin_reply": false,
+    "timestamp": "2026-03-29T19:55:29.671Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 4,
+  "fields": {
+    "sender": 5,
+    "chat_user": 5,
+    "message": "агов привіт",
+    "is_admin_reply": false,
+    "timestamp": "2026-03-30T14:35:25.718Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 5,
+  "fields": {
+    "sender": 5,
+    "chat_user": 5,
+    "message": "привіт",
+    "is_admin_reply": false,
+    "timestamp": "2026-03-30T14:35:37.324Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 6,
+  "fields": {
+    "sender": 3,
+    "chat_user": 5,
+    "message": "ротаівь",
+    "is_admin_reply": true,
+    "timestamp": "2026-03-30T14:35:40.667Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 7,
+  "fields": {
+    "sender": 3,
+    "chat_user": 2,
+    "message": "авп",
+    "is_admin_reply": true,
+    "timestamp": "2026-05-01T15:39:47.919Z"
+  }
+},
+{
+  "model": "main.chatmessage",
+  "pk": 8,
+  "fields": {
+    "sender": 1,
+    "chat_user": 1,
+    "message": "пр",
+    "is_admin_reply": false,
+    "timestamp": "2026-05-01T15:40:07.038Z"
+  }
+},
+{
+  "model": "main.subscriptionplan",
+  "pk": 1,
+  "fields": {
+    "name": "standard",
+    "price": "299.00",
+    "duration_days": 30
+  }
+},
+{
+  "model": "main.subscriptionplan",
+  "pk": 2,
+  "fields": {
+    "name": "family",
+    "price": "499.00",
+    "duration_days": 30
+  }
+},
+{
+  "model": "main.subscriptionplan",
+  "pk": 3,
+  "fields": {
+    "name": "student",
+    "price": "149.00",
+    "duration_days": 30
+  }
+},
+{
+  "model": "main.usersubscription",
+  "pk": 1,
+  "fields": {
+    "owner": 1,
+    "plan": 2,
+    "start_date": "2026-03-29T17:16:21.837Z",
+    "end_date": "2026-04-28T18:47:32.389Z",
+    "is_active": true,
+    "members": []
+  }
+},
+{
+  "model": "main.studentverification",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "document_photo": "verifications/images.jfif",
+    "status": "approved",
+    "submitted_at": "2026-03-29T18:33:12.508Z",
+    "reviewed_at": "2026-03-29T18:34:03.234Z"
+  }
+},
+{
+  "model": "main.studentverification",
+  "pk": 2,
+  "fields": {
+    "user": 7,
+    "document_photo": "verifications/1_pantone_collab_dark.jpg",
+    "status": "pending",
+    "submitted_at": "2026-05-05T17:02:56.597Z",
+    "reviewed_at": null
+  }
+},
+{
+  "model": "main.notification",
+  "pk": 1,
+  "fields": {
+    "user": 3,
+    "message": "Вітаємо! Ви успішно завершили курс \"Фондовий ринок: що таке акції та як інвестувати\".",
+    "notification_type": "success",
+    "is_read": true,
+    "link": "/course/4/",
+    "created_at": "2026-05-05T14:44:57.963Z"
+  }
+},
+{
+  "model": "main.blogpost",
+  "pk": 1,
+  "fields": {
+    "title": "5 порад як зекономити на щоденних витратах",
+    "slug": "5-porad-yak-zekonomyty",
+    "excerpt": "Прості та дієві стратегії, які допоможуть щомісяця відкладати від 2000 до 5000 гривень без суттєвого зниження якості життя.",
+    "content": 
