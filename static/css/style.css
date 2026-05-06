@@ -2031,3 +2031,123 @@ body {
         transform: none;
     }
 }
+
+/* ── Global content safety for small screens ── */
+img,
+video,
+iframe,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.blog-content,
+.course-card,
+.testimonial-card,
+.stat-card,
+.contact-form-wrapper,
+.cart-container {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Keep long blog/article elements inside viewport */
+.blog-content pre,
+.blog-content table {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+}
+
+/* ── Targeted mobile fixes for key pages ── */
+@media (max-width: 768px) {
+    .nav-wrapper {
+        gap: 12px;
+    }
+
+    .header-actions {
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .theme-toggle,
+    .cart-btn,
+    .notif-bell {
+        width: 36px;
+        height: 36px;
+    }
+
+    .mobile-menu {
+        width: min(90vw, 360px);
+        padding: 76px 20px 24px;
+    }
+
+    .profile-grid .course-item {
+        align-items: flex-start !important;
+    }
+
+    .profile-grid .course-item > div[style*="flex: 1"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .profile-grid .course-item a.btn-secondary {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .cart-item {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 14px !important;
+    }
+
+    .cart-item > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .cart-summary {
+        align-items: stretch !important;
+    }
+
+    .cart-summary .btn-primary {
+        width: 100% !important;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+    }
+
+    .profile-header h1 {
+        font-size: 22px !important;
+        line-height: 1.3;
+    }
+
+    .profile-grid .card {
+        padding: 16px !important;
+        border-radius: 14px !important;
+    }
+
+    .wf-legend {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .blog-content {
+        font-size: 16px !important;
+        line-height: 1.7 !important;
+    }
+
+    .blog-content h2 {
+        font-size: 21px !important;
+    }
+
+    .blog-content h3 {
+        font-size: 18px !important;
+    }
+}
