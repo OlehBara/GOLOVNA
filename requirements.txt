@@ -153,3 +153,5 @@
  zope.interface==8.2 
 
  pymysql 
+ mysqlclient
+ whitenoise
