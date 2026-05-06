@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Вхід - FinSmart" %}{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="background-image: url('{% static 'img/blue.png' %}');">
+    <div class="auth-card">
+        <!-- Logo -->
+        <div class="auth-logo">
+            <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="20" fill="#4a8fd5" fill-opacity="0.3" />
+                <rect x="13" y="18" width="3" height="12" rx="1.5" fill="white" />
+                <rect x="18.5" y="13" width="3" height="17" rx="1.5" fill="white" />
+                <rect x="24" y="15" width="3" height="15" rx="1.5" fill="white" />
+            </svg>
+            <span class="auth-logo-text">FinSmart</span>
+        </div>
+
+        <h2 class="auth-title">{% trans "Вхід" %}</h2>
+
+        {% if form.errors %}
+        <div class="auth-error">
+            {% trans "Невірний логін або пароль. Спробуйте ще раз." %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="material-form">
+            {% csrf_token %}
+
+            <div class="input-group">
+                {{ form.username }}
+                <label for="{{ form.username.id_for_label }}">{% trans "Логін або Email" %}</label>
+                <div class="input-bar"></div>
+            </div>
+
+            <div class="input-group">
+                {{ form.password }}
+                <label for="{{ form.password.id_for_label }}">{% trans "Пароль" %}</label>
+                <div class="input-bar"></div>
+            </div>
+
+            <div style="text-align: right; margin-bottom: 24px;">
+                <a href="{% url 'password_reset' %}" style="color: rgba(255,255,255,0.6); font-size: 13px; text-decoration: none; transition: color 0.2s;">{% trans "Забули пароль?" %}</a>
+            </div>
+
+            <button type="submit" class="btn-auth">
+                {% trans "УВІЙТИ" %}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </form>
+
+        <div class="auth-divider"><span>{% trans "або" %}</span></div>
+
+        <a href="/accounts/google/login/?process=login" class="btn-google" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4" />
+                <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853" />
+                <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05" />
+                <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335" />
+            </svg>
+            {% trans "Увійти через Google" %}
+        </a>
+
+        <div class="auth-footer">
+            {% trans "Ще не маєте акаунту?" %} <a href="{% url 'register' %}">{% trans "Зареєструватися" %}</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Full-page background ── */
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 40px 20px;
+        margin-top: -80px;
+        padding-top: 120px;
+    }
+
+    /* ── Glassmorphism Card ── */
+    .auth-card {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 20px;
+        padding: 48px 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .auth-card {
+        background: rgba(15, 20, 30, 0.55);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ── Logo ── */
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .auth-logo-text {
+        font-size: 22px;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.5px;
+    }
+
+    /* ── Title ── */
+    .auth-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 32px;
+        letter-spacing: -0.3px;
+    }
+
+    /* ── Error Banner ── */
+    .auth-error {
+        background: rgba(220, 38, 38, 0.25);
+        border: 1px solid rgba(220, 38, 38, 0.5);
+        color: #fca5a5;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    /* ── Material Inputs ── */
+    .material-form .input-group {
+        position: relative;
+        margin-bottom: 28px;
+    }
+
+    .material-form input {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+        color: white;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        outline: none;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .material-form input::placeholder {
+        color: transparent;
+    }
+
+    .material-form label {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.6);
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    .material-form input:focus~label,
+    .material-form input:not(:placeholder-shown)~label {
+        top: -14px;
+        font-size: 11px;
+        color: #4a8fd5;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .input-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #4a8fd5;
+        transition: width 0.3s ease;
+    }
+
+    .material-form input:focus~.input-bar {
+        width: 100%;
+    }
+
+    /* ── Submit Button ── */
+    .btn-auth {
+        width: 100%;
+        padding: 14px;
+        background: #4a8fd5;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+    }
+
+    .btn-auth:hover {
+        background: #3a7dbd;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 143, 213, 0.5);
+    }
+
+    /* ── Footer Link ── */
+    .auth-footer {
+        margin-top: 28px;
+        text-align: center;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .auth-footer a {
+        color: #4a8fd5;
+        font-weight: 800;
+        text-decoration: none;
+        position: relative;
+        transition: color 0.2s;
+    }
+
+    .auth-footer a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #4a8fd5;
+        transition: width 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+        color: #7db3e8;
+    }
+
+    .auth-footer a:hover::after {
+        width: 100%;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+        .auth-card {
+            padding: 36px 24px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+        }
+    }
+
+    /* ── Divider ── */
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 13px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── Google Button ── */
+    .btn-google {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 10px;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+        backdrop-filter: blur(4px);
+    }
+
+    .btn-google:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.material-form input').forEach(input => {
+            input.setAttribute('placeholder', ' ');
+            input.removeAttribute('style');
+        });
+    });
+</script>
+{% endblock %}

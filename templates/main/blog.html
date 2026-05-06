@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Блог - Фінансові поради | FinSmart{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">📝 Блог FinSmart</h1>
+        <p class="page-description">
+            Корисні статті, поради та стратегії для вашого фінансового розвитку
+        </p>
+    </div>
+</section>
+
+<!-- Category Filter -->
+<section style="padding: 20px 0 0;">
+    <div class="container">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            <a href="{% url 'blog' %}"
+                style="padding: 10px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all .25s;
+                {% if not current_category %}background: linear-gradient(135deg, #4a8fd5, #2c5282); color: #fff; box-shadow: 0 4px 15px rgba(74,143,213,.3);{% else %}background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-color);{% endif %}">
+                Усі статті
+            </a>
+            {% for cat_value, cat_label in categories %}
+            <a href="{% url 'blog' %}?category={{ cat_value }}"
+                style="padding: 10px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all .25s;
+                {% if current_category == cat_value %}background: linear-gradient(135deg, #4a8fd5, #2c5282); color: #fff; box-shadow: 0 4px 15px rgba(74,143,213,.3);{% else %}background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-color);{% endif %}">
+                {{ cat_label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Blog Grid -->
+<section style="padding: 50px 0 80px;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;">
+            {% for post in posts %}
+            <article class="animate-on-scroll"
+                style="background: var(--bg-card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); transition: transform .3s, box-shadow .3s; display: flex; flex-direction: column;"
+                onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 20px 50px rgba(0,0,0,.2)'"
+                onmouseout="this.style.transform=''; this.style.boxShadow=''">
+
+                <!-- Cover -->
+                <div style="height: 180px; background: linear-gradient(135deg, {% if post.category == 'savings' %}#065f46, #047857{% elif post.category == 'investing' %}#1e3a5f, #2c5282{% elif post.category == 'budgeting' %}#4c1d95, #6d28d9{% elif post.category == 'credit' %}#7c2d12, #c2410c{% else %}#1e3a5f, #4a8fd5{% endif %}); display: flex; align-items: center; justify-content: center; position: relative;">
+                    <span style="font-size: 64px; filter: drop-shadow(0 4px 20px rgba(0,0,0,.3));">{{ post.cover_emoji }}</span>
+                    <div style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,.3); backdrop-filter: blur(10px); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.8);">
+                        {{ post.get_category_display }}
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
+                    <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; line-height: 1.3;">
+                        <a href="{% url 'blog_detail' post.slug %}" style="text-decoration: none; color: inherit;">{{ post.title }}</a>
+                    </h2>
+                    <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; flex: 1; margin-bottom: 16px;">
+                        {{ post.excerpt|truncatewords:25 }}
+                    </p>
+
+                    <!-- Meta -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 16px; font-size: 12px; color: var(--text-muted);">
+                            <span>📅 {{ post.created_at|date:"d.m.Y" }}</span>
+                            <span>⏱ {{ post.reading_time }} хв</span>
+                            <span>👁 {{ post.views_count }}</span>
+                        </div>
+                        <a href="{% url 'blog_detail' post.slug %}"
+                            style="font-size: 13px; font-weight: 700; color: var(--brand-primary); text-decoration: none;">
+                            Читати →
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
+                <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">📝</div>
+                <h3 style="font-size: 20px; color: var(--text-secondary); margin-bottom: 8px;">Статей поки немає</h3>
+                <p style="color: var(--text-muted);">Скоро тут з'являться корисні матеріали!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

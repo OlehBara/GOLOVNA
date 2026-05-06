@@ -1,0 +1,665 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Фінансовий квіз — FinSmart{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+        --qz-bg: #0f0a1e;
+        --qz-card: #1a1035;
+        --qz-border: rgba(168, 85, 247, .15);
+        --qz-text: #f1ecff;
+        --qz-muted: #94a3b8;
+        --qz-v5: #8b3fd6;
+        --qz-v4: #a855f7;
+        --qz-v3: #c084fc;
+        --qz-green: #22c55e;
+        --qz-red: #ef4444;
+    }
+
+    * { font-family: 'Inter', sans-serif; }
+
+    .quiz-page {
+        min-height: 100vh;
+        background: linear-gradient(160deg, #0f0a1e 0%, #1a0d2e 50%, #0f0a1e 100%);
+        padding: 40px 20px 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quiz-page::before {
+        content: '';
+        position: absolute;
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(168,85,247,.12), transparent 70%);
+        top: -200px; right: -100px;
+        pointer-events: none;
+    }
+
+    .quiz-container {
+        max-width: 720px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Header */
+    .quiz-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .quiz-emoji { font-size: 56px; margin-bottom: 16px; display: block; }
+
+    .quiz-main-title {
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 900;
+        color: #fff;
+        margin: 0 0 12px;
+        line-height: 1.2;
+    }
+
+    .quiz-subtitle {
+        font-size: 17px;
+        color: rgba(255,255,255,.6);
+        max-width: 500px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Progress */
+    .quiz-progress {
+        margin-bottom: 36px;
+    }
+
+    .quiz-progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--qz-muted);
+    }
+
+    .quiz-progress-bar {
+        height: 6px;
+        background: rgba(168,85,247,.15);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--qz-v5), var(--qz-v4), var(--qz-v3));
+        border-radius: 20px;
+        transition: width .4s cubic-bezier(.4,0,.2,1);
+        width: 0%;
+    }
+
+    /* Question Card */
+    .quiz-card {
+        background: rgba(26, 16, 53, .85);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--qz-border);
+        border-radius: 24px;
+        padding: 40px 36px;
+        box-shadow: 0 24px 64px rgba(0,0,0,.4);
+        animation: qzFadeIn .4s ease;
+    }
+
+    @keyframes qzFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-q-num {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--qz-v4);
+        margin-bottom: 14px;
+    }
+
+    .quiz-q-text {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.4;
+        margin: 0 0 28px;
+    }
+
+    /* Options */
+    .quiz-options { display: flex; flex-direction: column; gap: 12px; }
+
+    .quiz-opt {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border: 1.5px solid var(--qz-border);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all .25s ease;
+        user-select: none;
+        background: transparent;
+    }
+
+    .quiz-opt:hover {
+        border-color: var(--qz-v4);
+        background: rgba(168,85,247,.06);
+    }
+
+    .quiz-opt.selected {
+        border-color: var(--qz-v5);
+        background: rgba(168,85,247,.12);
+    }
+
+    .quiz-opt.correct {
+        border-color: var(--qz-green) !important;
+        background: rgba(34,197,94,.1) !important;
+    }
+
+    .quiz-opt.wrong {
+        border-color: var(--qz-red) !important;
+        background: rgba(239,68,68,.1) !important;
+    }
+
+    .quiz-opt-letter {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        background: rgba(168,85,247,.15);
+        color: var(--qz-v4);
+        font-size: 14px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: all .25s;
+    }
+
+    .quiz-opt.selected .quiz-opt-letter {
+        background: var(--qz-v5); color: #fff;
+    }
+    .quiz-opt.correct .quiz-opt-letter {
+        background: var(--qz-green) !important; color: #fff !important;
+    }
+    .quiz-opt.wrong .quiz-opt-letter {
+        background: var(--qz-red) !important; color: #fff !important;
+    }
+
+    .quiz-opt-text {
+        font-size: 15px;
+        color: var(--qz-text);
+        line-height: 1.45;
+    }
+
+    /* Navigation Buttons */
+    .quiz-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 32px;
+        gap: 12px;
+    }
+
+    .quiz-btn {
+        padding: 14px 36px;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s;
+        border: none;
+    }
+
+    .quiz-btn-next {
+        background: linear-gradient(135deg, var(--qz-v5), var(--qz-v4));
+        color: #fff;
+        box-shadow: 0 8px 30px rgba(168,85,247,.4);
+        margin-left: auto;
+    }
+
+    .quiz-btn-next:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 40px rgba(168,85,247,.55);
+    }
+
+    .quiz-btn-next:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .quiz-btn-prev {
+        background: transparent;
+        border: 1.5px solid var(--qz-border);
+        color: var(--qz-muted);
+    }
+
+    .quiz-btn-prev:hover {
+        border-color: var(--qz-v4);
+        color: var(--qz-v4);
+    }
+
+    /* Result */
+    .quiz-result {
+        text-align: center;
+        animation: qzFadeIn .5s ease;
+    }
+
+    .result-emoji { font-size: 72px; display: block; margin-bottom: 16px; }
+
+    .result-level {
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--qz-v4);
+        margin-bottom: 8px;
+    }
+
+    .result-title {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 900;
+        color: #fff;
+        margin: 0 0 16px;
+    }
+
+    .result-desc {
+        font-size: 16px;
+        color: rgba(255,255,255,.65);
+        margin-bottom: 32px;
+        line-height: 1.6;
+    }
+
+    .result-score-ring {
+        width: 160px; height: 160px;
+        margin: 0 auto 32px;
+        position: relative;
+    }
+
+    .result-score-ring svg { transform: rotate(-90deg); }
+
+    .result-score-circle {
+        fill: none;
+        stroke: rgba(168,85,247,.15);
+        stroke-width: 8;
+    }
+
+    .result-score-progress {
+        fill: none;
+        stroke: url(#scoreGrad);
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1.5s ease;
+    }
+
+    .result-score-text {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        font-size: 36px;
+        font-weight: 900;
+        color: #fff;
+    }
+
+    .result-score-label {
+        font-size: 12px;
+        color: var(--qz-muted);
+        font-weight: 600;
+    }
+
+    /* Recommended courses */
+    .rec-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin: 40px 0 20px;
+    }
+
+    .rec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        text-align: left;
+    }
+
+    .rec-card {
+        background: rgba(26,16,53,.8);
+        border: 1px solid var(--qz-border);
+        border-radius: 14px;
+        padding: 20px;
+        transition: all .25s;
+        text-decoration: none;
+    }
+
+    .rec-card:hover {
+        border-color: var(--qz-v4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(168,85,247,.2);
+    }
+
+    .rec-card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+        line-height: 1.35;
+    }
+
+    .rec-card-cat {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--qz-v4);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .rec-card-badge {
+        display: inline-block;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-top: 8px;
+        font-weight: 700;
+    }
+
+    .rec-card-badge.free { background: rgba(34,197,94,.15); color: var(--qz-green); }
+    .rec-card-badge.premium { background: rgba(245,183,49,.15); color: #f5b731; }
+
+    /* Share */
+    .result-share {
+        margin-top: 32px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .share-result-btn {
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: all .2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .share-result-btn:hover { transform: translateY(-2px); }
+
+    .btn-retry {
+        background: linear-gradient(135deg, var(--qz-v5), var(--qz-v4));
+        color: #fff;
+    }
+
+    .btn-share-tw { background: #0f1419; color: #fff; }
+    .btn-share-tg { background: #0088cc; color: #fff; }
+
+    /* Start screen */
+    .quiz-start { text-align: center; }
+
+    .quiz-start-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 14px;
+        margin: 32px 0;
+    }
+
+    .quiz-feature {
+        background: rgba(168,85,247,.08);
+        border: 1px solid var(--qz-border);
+        border-radius: 14px;
+        padding: 20px 14px;
+    }
+
+    .quiz-feature-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+    .quiz-feature-text { font-size: 13px; font-weight: 600; color: var(--qz-text); }
+
+    .btn-start-quiz {
+        padding: 18px 60px;
+        background: linear-gradient(135deg, var(--qz-v5), var(--qz-v4));
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 10px 40px rgba(168,85,247,.5);
+        transition: all .25s;
+    }
+
+    .btn-start-quiz:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 16px 50px rgba(168,85,247,.6);
+    }
+
+    @media (max-width: 600px) {
+        .quiz-card { padding: 28px 20px; }
+        .quiz-q-text { font-size: 18px; }
+    }
+</style>
+
+<div class="quiz-page">
+    <div class="quiz-container">
+
+        <!-- START SCREEN -->
+        <div id="quizStart" class="quiz-start">
+            <div class="quiz-header">
+                <span class="quiz-emoji">🧠</span>
+                <h1 class="quiz-main-title">Перевір свою фінансову грамотність</h1>
+                <p class="quiz-subtitle">Дізнайся свій рівень знань та отримай персональні рекомендації курсів для розвитку</p>
+            </div>
+
+            <div class="quiz-start-features">
+                <div class="quiz-feature">
+                    <span class="quiz-feature-icon">❓</span>
+                    <span class="quiz-feature-text">10 запитань</span>
+                </div>
+                <div class="quiz-feature">
+                    <span class="quiz-feature-icon">⏱️</span>
+                    <span class="quiz-feature-text">~5 хвилин</span>
+                </div>
+                <div class="quiz-feature">
+                    <span class="quiz-feature-icon">📊</span>
+                    <span class="quiz-feature-text">Ваш рівень</span>
+                </div>
+                <div class="quiz-feature">
+                    <span class="quiz-feature-icon">🎯</span>
+                    <span class="quiz-feature-text">Рекомендації</span>
+                </div>
+            </div>
+
+            <button class="btn-start-quiz" onclick="startQuiz()">Почати квіз →</button>
+        </div>
+
+        <!-- QUIZ QUESTIONS -->
+        <div id="quizGame" style="display:none;">
+            <div class="quiz-progress">
+                <div class="quiz-progress-info">
+                    <span id="qProgressText">Питання 1 з 10</span>
+                    <span id="qProgressPercent">0%</span>
+                </div>
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="qProgressFill"></div>
+                </div>
+            </div>
+
+            <div class="quiz-card" id="quizCardArea">
+                <!-- Rendered by JS -->
+            </div>
+
+            <div class="quiz-actions">
+                <button class="quiz-btn quiz-btn-prev" id="btnPrev" onclick="prevQuestion()" style="display:none;">← Назад</button>
+                <button class="quiz-btn quiz-btn-next" id="btnNext" onclick="nextQuestion()" disabled>Далі →</button>
+            </div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="quizResult" style="display:none;">
+            <!-- Rendered by JS -->
+        </div>
+
+    </div>
+</div>
+
+<script>
+const QUESTIONS = {{ questions_json|safe }};
+let currentQ = 0;
+let answers = {};
+
+function startQuiz() {
+    document.getElementById('quizStart').style.display = 'none';
+    document.getElementById('quizGame').style.display = 'block';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = QUESTIONS[currentQ];
+    const letters = ['A','B','C','D'];
+    const selected = answers[q.id];
+
+    document.getElementById('qProgressText').textContent = `Питання ${currentQ + 1} з ${QUESTIONS.length}`;
+    const pct = Math.round(((currentQ) / QUESTIONS.length) * 100);
+    document.getElementById('qProgressPercent').textContent = pct + '%';
+    document.getElementById('qProgressFill').style.width = pct + '%';
+
+    document.getElementById('btnPrev').style.display = currentQ > 0 ? '' : 'none';
+    document.getElementById('btnNext').textContent = currentQ === QUESTIONS.length - 1 ? 'Завершити ✓' : 'Далі →';
+    document.getElementById('btnNext').disabled = selected === undefined;
+
+    let html = `
+        <div class="quiz-q-num">Питання ${currentQ + 1} з ${QUESTIONS.length}</div>
+        <p class="quiz-q-text">${q.question}</p>
+        <div class="quiz-options">
+    `;
+
+    q.options.forEach((opt, i) => {
+        const isSelected = selected === i;
+        html += `
+            <div class="quiz-opt ${isSelected ? 'selected' : ''}" onclick="selectOption(${q.id}, ${i})">
+                <span class="quiz-opt-letter">${letters[i]}</span>
+                <span class="quiz-opt-text">${opt}</span>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    document.getElementById('quizCardArea').innerHTML = html;
+}
+
+function selectOption(qId, optIndex) {
+    answers[qId] = optIndex;
+    document.getElementById('btnNext').disabled = false;
+    renderQuestion();
+}
+
+function prevQuestion() {
+    if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+function nextQuestion() {
+    if (currentQ < QUESTIONS.length - 1) {
+        currentQ++;
+        renderQuestion();
+    } else {
+        submitQuiz();
+    }
+}
+
+function submitQuiz() {
+    document.getElementById('quizGame').style.display = 'none';
+    document.getElementById('quizResult').innerHTML = '<div style="text-align:center;padding:60px;color:#fff;">Обчислюємо результат...</div>';
+    document.getElementById('quizResult').style.display = 'block';
+
+    fetch('/api/quiz/result/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ answers: answers })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) renderResult(data);
+    });
+}
+
+function renderResult(data) {
+    const circumference = 2 * Math.PI * 60;
+    const offset = circumference - (data.percentage / 100) * circumference;
+
+    let coursesHtml = '';
+    if (data.recommended_courses && data.recommended_courses.length > 0) {
+        coursesHtml = '<h3 class="rec-title">🎯 Рекомендовані курси для вас</h3><div class="rec-grid">';
+        data.recommended_courses.forEach(c => {
+            coursesHtml += `
+                <a href="/course/${c.id}/" class="rec-card">
+                    <div class="rec-card-title">${c.title}</div>
+                    <div class="rec-card-cat">${c.category}</div>
+                    <span class="rec-card-badge ${c.is_premium ? 'premium' : 'free'}">${c.is_premium ? '⭐ Premium' : '✓ Безкоштовно'}</span>
+                </a>
+            `;
+        });
+        coursesHtml += '</div>';
+    }
+
+    const shareText = encodeURIComponent(`Мій рівень фінансової грамотності: ${data.level_name} (${data.percentage}%) — FinSmart`);
+    const shareUrl = encodeURIComponent(window.location.origin + '/quiz/');
+
+    document.getElementById('quizResult').innerHTML = `
+        <div class="quiz-result">
+            <span class="result-emoji">${data.level_emoji}</span>
+            <div class="result-level">Ваш рівень</div>
+            <h2 class="result-title">${data.level_name}</h2>
+            <p class="result-desc">${data.description}</p>
+
+            <div class="result-score-ring">
+                <svg width="160" height="160" viewBox="0 0 160 160">
+                    <defs>
+                        <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8b3fd6"/>
+                            <stop offset="100%" style="stop-color:#c084fc"/>
+                        </linearGradient>
+                    </defs>
+                    <circle class="result-score-circle" cx="80" cy="80" r="60"/>
+                    <circle class="result-score-progress" cx="80" cy="80" r="60"
+                        stroke-dasharray="${circumference}"
+                        stroke-dashoffset="${circumference}"
+                        id="scoreCircle"/>
+                </svg>
+                <div class="result-score-text">
+                    ${data.score}/${data.total}
+                    <div class="result-score-label">${data.percentage}%</div>
+                </div>
+            </div>
+
+            ${coursesHtml}
+
+            <div class="result-share">
+                <button class="share-result-btn btn-retry" onclick="retryQuiz()">🔄 Пройти знову</button>
+                <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" rel="noopener" class="share-result-btn btn-share-tw">𝕏 Поділитись</a>
+                <a href="https://t.me/share/url?url=${shareUrl}&text=${shareText}" target="_blank" rel="noopener" class="share-result-btn btn-share-tg">✈ Telegram</a>
+            </div>
+        </div>
+    `;
+
+    // Animate score circle
+    setTimeout(() => {
+        document.getElementById('scoreCircle').style.strokeDashoffset = offset;
+    }, 100);
+}
+
+function retryQuiz() {
+    currentQ = 0;
+    answers = {};
+    document.getElementById('quizResult').style.display = 'none';
+    document.getElementById('quizStart').style.display = 'block';
+}
+</script>
+
+{% endblock %}

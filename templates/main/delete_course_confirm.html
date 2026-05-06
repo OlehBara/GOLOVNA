@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Видалити курс - FinSmart{% endblock %}
+
+{% block content %}
+<section
+    style="padding: 100px 0; min-height: 80vh; background: var(--bg-secondary); display: flex; align-items: center;">
+    <div class="container" style="max-width: 560px; text-align: center;">
+        <div style="background: var(--bg-primary); border-radius: 20px; padding: 50px 40px;
+                    box-shadow: var(--shadow-lg); border: 2px solid #fed7d7;">
+            <div style="font-size: 56px; margin-bottom: 20px;">🗑️</div>
+            <h1 style="font-size: 28px; font-weight: 800; color: #c53030; margin-bottom: 16px;">
+                Видалити курс?
+            </h1>
+            <p style="font-size: 17px; color: var(--text-muted); margin-bottom: 8px;">
+                Ви збираєтесь назавжди видалити:
+            </p>
+            <p style="font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 32px;
+                      background: var(--bg-secondary); padding: 14px 20px; border-radius: 10px;">
+                «{{ course.title }}»
+            </p>
+            <p style="font-size: 14px; color: #c53030; margin-bottom: 32px; font-weight: 600;">
+                ⚠️ Цю дію не можна скасувати!
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-admin-delete" style="font-size: 16px; padding: 14px 30px;">
+                        🗑️ Так, видалити
+                    </button>
+                </form>
+                <a href="{% url 'course_detail' course.id %}" style="padding: 14px 30px; font-size: 16px; border-radius: 10px; text-decoration: none;
+                           color: var(--text-primary); border: 2px solid var(--border-color);
+                           display: inline-flex; align-items: center; font-weight: 700;">
+                    ← Скасувати
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

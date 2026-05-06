@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "FinSmart - Система рекомендацій з фінансової грамотності" %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Toastify.js -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Header / Navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-wrapper">
+                <!-- Logo -->
+                <a href="{% url 'index' %}" class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="20" fill="#1e5a8e" />
+                        <rect x="13" y="18" width="3" height="12" rx="1.5" fill="white" />
+                        <rect x="18.5" y="13" width="3" height="17" rx="1.5" fill="white" />
+                        <rect x="24" y="15" width="3" height="15" rx="1.5" fill="white" />
+                    </svg>
+                    <span class="logo-text">FinSmart</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="nav">
+                    <a href="{% url 'index' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">{% trans "Головна" %}</a>
+                    <a href="{% url 'courses' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">{% trans "Курси" %}</a>
+                    <a href="{% url 'quiz' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'quiz' %}active{% endif %}">{% trans "Квіз" %}</a>
+                    <a href="{% url 'blog' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'blog' or request.resolver_match.url_name == 'blog_detail' %}active{% endif %}">{% trans "Блог" %}</a>
+                    <a href="{% url 'about' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">{% trans "Про нас" %}</a>
+                    <a href="{% url 'contact' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">{% trans "Контакти" %}</a>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle" aria-label="{% trans 'Перемикач теми' %}">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        </svg>
+                    </button>
+
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn-register-desktop"
+                        style="background: #ffa048; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin-right: 15px; font-weight: 700; display: inline-flex; align-items: center;">Реєстрація</a>
+                    {% else %}
+                    <div class="user-menu" style="display: flex; align-items: center; gap: 15px; margin-right: 15px;">
+                        {% if user.is_staff %}
+                        <a href="/admin/" class="admin-link" title="Панель управління"
+                            style="font-size: 22px; text-decoration: none; line-height: 1; padding: 4px 6px; border-radius: 8px;">
+                            👑
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'profile' %}"
+                            style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+                            <div class="user-avatar-nav"
+                                style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brand-primary); display: flex; align-items: center; justify-content: center;">
+                                {% if user.profile.image and user.profile.image.url != '/media/default.jpg' %}
+                                <img src="{{ user.profile.image.url }}"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                <div class="letter-avatar" style="font-size: 0.9rem;">{{ user.username|first|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <span style="font-weight: 600; color: var(--text-primary);">{{ user.username }}</span>
+                        </a>
+                        <form method="post" action="{% url 'logout' %}"
+                            style="margin: 0; display: flex; align-items: center;">
+                            {% csrf_token %}
+                            <button type="submit"
+                                style="background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 4px; padding: 0;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                    <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="notif-badge" id="notifBadge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-header">
+                                <span>Сповіщення</span>
+                                <button onclick="markAllRead(event)" style="background:none;border:none;color:var(--brand-primary);font-size:12px;font-weight:600;cursor:pointer;">Прочитати все</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="notif-empty">Завантаження...</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'cart_detail' %}" class="cart-btn"
+                        style="position: relative; text-decoration: none; color: var(--text-primary); transition: color 0.3s ease; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <span id="cartBadge" class="cart-badge {% if cart_item_count <= 0 %}d-none{% endif %}">
+                            {{ cart_item_count|default:0 }}
+                        </span>
+                    </a>
+
+                    <!-- Burger Menu Button -->
+                    <div class="burger-menu" id="burgerMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="{% url 'index' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Головна</a>
+            <a href="{% url 'courses' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">Курси</a>
+            <a href="{% url 'quiz' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'quiz' %}active{% endif %}">Квіз</a>
+            <a href="{% url 'blog' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">Блог</a>
+            <a href="{% url 'about' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">Про нас</a>
+            <a href="{% url 'contact' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Контакти</a>
+
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="nav-link"
+                style="color: var(--accent-orange); font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Реєстрація
+            </a>
+            {% else %}
+            <div class="nav-link"
+                style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 0; border-bottom: none;">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                    <span
+                        style="width: 24px; height: 24px; background: var(--brand-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                        {{ user.username|make_list|first|upper }}
+                    </span>
+                    {{ user.username }}
+                </div>
+                {% if user.is_staff %}
+                <a href="/admin/" class="admin-link" style="font-size: 14px;">👑 Панель управління</a>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit"
+                        style="background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 8px; padding: 0; font-family: inherit;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Вийти
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Messages rendered as Toasts -->
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                showToast("{{ message|escapejs }}", "{{ message.tags }}");
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+
+    <!-- Global Reading Progress Bar -->
+    <div class="reading-progress" id="readingProgress"></div>
+    <script>
+    window.addEventListener('scroll', function() {
+        var h = document.documentElement, b = document.body;
+        var st = h.scrollTop || b.scrollTop;
+        var sh = (h.scrollHeight || b.scrollHeight) - h.clientHeight;
+        var pct = sh > 0 ? (st / sh) * 100 : 0;
+        document.getElementById('readingProgress').style.width = pct + '%';
+    });
+    </script>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FinSmart</h3>
+                    <p class="footer-description">
+                        Ваш надійний партнер у світі фінансової грамотності
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Навігація</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'index' %}" class="footer-link">Головна</a>
+                        <a href="{% url 'courses' %}" class="footer-link">Курси</a>
+                        <a href="{% url 'about' %}" class="footer-link">Про нас</a>
+                        <a href="{% url 'contact' %}" class="footer-link">Контакти</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Курси</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'courses' %}?category=budgeting" class="footer-link">Бюджетування</a>
+                        <a href="{% url 'courses' %}?category=investing" class="footer-link">Інвестування</a>
+                        <a href="{% url 'courses' %}?category=credit" class="footer-link">Кредити</a>
+                        <a href="{% url 'courses' %}?category=pension" class="footer-link">Пенсії</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Підтримка</h3>
+                    <div class="footer-links">
+                        <a href="{% url 'contact' %}" class="footer-link">Центр допомоги</a>
+                        <a href="#" class="footer-link">Політика конфіденційності</a>
+                        <a href="#" class="footer-link">Умови використання</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2025 FinSmart. Всі права захищені.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop" aria-label="Прокрутити вгору">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% if user.is_authenticated %}
+    <script>
+    function toggleNotifDropdown() {
+        const dd = document.getElementById('notifDropdown');
+        dd.classList.toggle('show');
+        if (dd.classList.contains('show')) loadNotifications();
+    }
+    document.addEventListener('click', function(e) {
+        const bell = document.getElementById('notifBell');
+        if (bell && !bell.contains(e.target)) {
+            document.getElementById('notifDropdown').classList.remove('show');
+        }
+    });
+    function loadNotifications() {
+        fetch('/api/notifications/')
+            .then(r => r.json())
+            .then(data => {
+                const list = document.getElementById('notifList');
+                if (!data.notifications || data.notifications.length === 0) {
+                    list.innerHTML = '<div class="notif-empty">🔔 Немає нових сповіщень</div>';
+                    return;
+                }
+                list.innerHTML = data.notifications.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="readNotif(${n.id}, '${n.link}')">
+                        <div class="notif-icon ${n.type}">${{info:'ℹ️',success:'✅',warning:'⚠️'}[n.type] || 'ℹ️'}</div>
+                        <div><div class="notif-text">${n.message}</div><div class="notif-time">${n.time_ago}</div></div>
+                    </div>
+                `).join('');
+            });
+    }
+    function readNotif(id, link) {
+        fetch('/api/notifications/read/' + id + '/', {method:'POST', headers:{'X-CSRFToken': document.cookie.split('csrftoken=')[1]?.split(';')[0] || ''}})
+            .then(() => { if (link) window.location.href = link; });
+    }
+    function markAllRead(e) {
+        e.stopPropagation();
+        fetch('/api/notifications/read-all/', {method:'POST', headers:{'X-CSRFToken': document.cookie.split('csrftoken=')[1]?.split(';')[0] || ''}})
+            .then(() => {
+                document.getElementById('notifList').innerHTML = '<div class="notif-empty">🔔 Немає нових сповіщень</div>';
+                const badge = document.getElementById('notifBadge');
+                if (badge) badge.style.display = 'none';
+            });
+    }
+    </script>
+    {% endif %}
+    <!-- Toastify.js -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        /**
+         * Global Premium Toast Helper
+         * @param {string} message - Message to display
+         * @param {string} type - 'success', 'error', 'warning', 'info'
+         */
+        function showToast(message, type = 'info') {
+            let icon = '<i class="fa-solid fa-circle-info" style="color: #e0f2fe; font-size: 18px;"></i>';
+            let borderColor = "transparent";
+            let shadowStr = "none";
+            let bgStr = "none";
+            let extraClass = "toast-shimmer-blue";
+            
+            if (type === 'success') {
+                icon = '<i class="fa-solid fa-check-circle" style="color: #34d399; font-size: 18px;"></i>';
+                borderColor = "rgba(16, 185, 129, 0.4)";
+                shadowStr = "0 12px 40px rgba(16, 185, 129, 0.15)";
+                bgStr = "linear-gradient(145deg, rgba(6, 78, 59, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            } else if (type === 'error' || type === 'danger') {
+                icon = '<i class="fa-solid fa-circle-exclamation" style="color: #f87171; font-size: 18px;"></i>';
+                borderColor = "rgba(239, 68, 68, 0.4)";
+                shadowStr = "0 12px 40px rgba(239, 68, 68, 0.2)";
+                bgStr = "linear-gradient(145deg, rgba(127, 29, 29, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            } else if (type === 'warning') {
+                icon = '<i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24; font-size: 18px;"></i>';
+                borderColor = "rgba(245, 158, 11, 0.4)";
+                shadowStr = "0 12px 40px rgba(245, 158, 11, 0.15)";
+                bgStr = "linear-gradient(145deg, rgba(120, 53, 15, 0.9), rgba(15, 23, 42, 0.95))";
+                extraClass = "";
+            }
+
+            const contentHTML = `
+                <div style="display: flex; align-items: center; gap: 16px; font-family: 'Inter', sans-serif;">
+                    <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);">
+                        ${icon}
+                    </div>
+                    <span style="font-size: 15px; font-weight: 500; letter-spacing: 0.3px; color: #f8fafc; line-height: 1.4;">${message}</span>
+                </div>
+            `;
+
+            let customStyle = {
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                borderRadius: "20px",
+                padding: "16px 24px 16px 20px",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center"
+            };
+
+            if (bgStr !== "none") {
+                customStyle.background = bgStr;
+                customStyle.boxShadow = shadowStr + ", inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 0 0 1px " + borderColor;
+            }
+
+            Toastify({
+                text: contentHTML,
+                escapeMarkup: false,
+                duration: 4500,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                className: "premium-toast " + extraClass,
+                style: customStyle
+            }).showToast();
+        }
+    </script>
+    <style>
+        @keyframes shimmer-bg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .toast-shimmer-blue {
+            background: linear-gradient(270deg, rgba(14, 165, 233, 0.95), rgba(56, 189, 248, 0.95), rgba(59, 130, 246, 0.95), rgba(99, 102, 241, 0.95)) !important;
+            background-size: 300% 300% !important;
+            animation: shimmer-bg 4s ease infinite !important;
+            border: 1px solid rgba(186, 230, 253, 0.4) !important;
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* Custom close button for premium toasts */
+        .premium-toast .toast-close {
+            color: rgba(255, 255, 255, 0.6) !important;
+            font-size: 20px !important;
+            opacity: 1 !important;
+            transition: color 0.2s, transform 0.2s !important;
+            margin-left: 18px !important;
+            padding: 4px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .premium-toast .toast-close:hover {
+            color: #ffffff !important;
+            transform: scale(1.1) !important;
+        }
+    </style>
+
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+
+</html>

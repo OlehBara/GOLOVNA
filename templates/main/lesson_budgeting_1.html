@@ -1,0 +1,908 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Урок 1: Що таке бюджет — Основи бюджетування | FinSmart{% endblock %}
+
+
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+        --v9: #1a0533;
+        --v8: #2d0a52;
+        --v7: #4a0e8f;
+        --v6: #6c22b8;
+        --v5: #8b3fd6;
+        --v4: #a855f7;
+        --v3: #c084fc;
+        --gold: #f5b731;
+        --green: #22c55e;
+        --red: #ef4444;
+        --radius: 16px;
+    }
+
+    [data-theme="dark"] .ls-wrap,
+    [data-theme="dark"] .ls-wrap ~ * {
+        --bg: #0f0a1e;
+        --bg2: #1a0d2e;
+        --card: #1e1535;
+        --card2: #251a3a;
+        --txt: #f1ecff;
+        --muted: #94a3b8;
+        --border: rgba(168, 85, 247, .15);
+    }
+
+    [data-theme="light"] .ls-wrap,
+    [data-theme="light"] .ls-wrap ~ * {
+        --bg: #f8f9fc;
+        --bg2: #ffffff;
+        --card: #ffffff;
+        --card2: #f1f5f9;
+        --txt: #1e293b;
+        --muted: #64748b;
+        --border: rgba(168, 85, 247, .2);
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+        box-sizing: border-box;
+    }
+
+    .ls-wrap {
+        color: var(--txt);
+    }
+
+    /* ── Layout ── */
+    .ls-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 28px;
+        align-items: start;
+    }
+
+    @media(max-width:860px) {
+        .ls-wrap {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Sidebar ── */
+    .ls-sidebar {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 16px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .ls-sb-badge {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--v4);
+        background: rgba(168, 85, 247, .12);
+        padding: 3px 10px;
+        border-radius: 999px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .ls-sb-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--txt);
+        margin: 0 0 14px;
+    }
+
+    .ls-sb-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .ls-sb-list li {
+        margin-bottom: 4px;
+    }
+
+    .ls-sb-list li a {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 13px;
+        color: var(--muted);
+        transition: background .2s;
+    }
+
+    .ls-sb-list li a:hover {
+        background: rgba(148, 163, 184, .1);
+    }
+
+    .ls-sb-list li.active a {
+        background: rgba(168, 85, 247, .18);
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .ls-sb-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(168, 85, 247, .18);
+        color: var(--v4);
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ls-sb-list li.active .ls-sb-num {
+        background: var(--v5);
+        color: #fff;
+    }
+
+    /* ── Main ── */
+    .ls-main {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    /* ── Breadcrumb ── */
+    .ls-bc {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+    }
+
+    .ls-bc a {
+        color: var(--v4);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .ls-bc a:hover {
+        text-decoration: underline;
+    }
+
+    .ls-bc-sep {
+        opacity: .5;
+    }
+
+    /* ── Hero ── */
+    .ls-hero {
+        margin-bottom: 4px;
+    }
+
+    .ls-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: var(--v4);
+        background: rgba(168, 85, 247, .12);
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+    }
+
+    .ls-title {
+        font-size: clamp(24px, 3.5vw, 36px);
+        font-weight: 900;
+        color: var(--txt);
+        margin: 0 0 12px;
+        line-height: 1.2;
+    }
+
+    .ls-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 13px;
+        color: var(--muted);
+        flex-wrap: wrap;
+    }
+
+    .ls-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Section label ── */
+    .ls-sec-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--v4);
+        margin-bottom: 16px;
+    }
+
+    /* ── Video ── */
+    .ls-video-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+    }
+
+    .ls-video-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* ── Content card ── */
+    .ls-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+    }
+
+    .ls-prose {
+        font-size: 15.5px;
+        line-height: 1.85;
+        color: var(--txt); opacity: 0.85;
+    }
+
+    .ls-prose h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--txt);
+        margin: 28px 0 12px;
+        border-left: 3px solid var(--v4);
+        padding-left: 14px;
+    }
+
+    .ls-prose h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--txt);
+        margin: 20px 0 8px;
+    }
+
+    .ls-prose p {
+        margin: 0 0 16px;
+    }
+
+    .ls-prose ul {
+        padding-left: 20px;
+        margin: 0 0 16px;
+    }
+
+    .ls-prose li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+    }
+
+    .ls-prose strong {
+        color: var(--txt);
+    }
+
+    .ls-callout {
+        background: rgba(168, 85, 247, .08);
+        border: 1px solid rgba(168, 85, 247, .25);
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin: 18px 0;
+        display: flex;
+        gap: 12px;
+    }
+
+    .ls-callout-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .ls-callout-text {
+        font-size: 14.5px;
+        color: var(--txt); opacity: 0.8;
+        line-height: 1.6;
+    }
+
+    /* ── Quiz ── */
+    .ls-quiz-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .ls-quiz-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        transition: box-shadow .3s;
+    }
+
+    .ls-quiz-card.answered {
+        box-shadow: 0 0 0 2px rgba(168, 85, 247, .2);
+    }
+
+    .ls-quiz-num {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--v4);
+        margin-bottom: 10px;
+    }
+
+    .ls-quiz-q {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--txt);
+        margin: 0 0 20px;
+        line-height: 1.4;
+    }
+
+    .ls-opts {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .ls-opt {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        user-select: none;
+    }
+
+    .ls-opt:hover {
+        border-color: var(--v4);
+        background: rgba(168, 85, 247, .06);
+    }
+
+    .ls-opt.selected {
+        border-color: var(--v5);
+        background: rgba(168, 85, 247, .1);
+    }
+
+    .ls-opt.correct {
+        border-color: var(--green) !important;
+        background: rgba(34, 197, 94, .08) !important;
+    }
+
+    .ls-opt.wrong {
+        border-color: var(--red) !important;
+        background: rgba(239, 68, 68, .08) !important;
+    }
+
+    .ls-opt input {
+        display: none;
+    }
+
+    .ls-opt-letter {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: rgba(168, 85, 247, .12);
+        color: var(--v4);
+        font-size: 13px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background .2s, color .2s;
+    }
+
+    .ls-opt.selected .ls-opt-letter {
+        background: var(--v5);
+        color: #fff;
+    }
+
+    .ls-opt.correct .ls-opt-letter {
+        background: var(--green) !important;
+        color: #fff !important;
+    }
+
+    .ls-opt.wrong .ls-opt-letter {
+        background: var(--red) !important;
+        color: #fff !important;
+    }
+
+    .ls-opt-text {
+        font-size: 14.5px;
+        color: var(--txt); opacity: 0.85;
+        line-height: 1.4;
+    }
+
+    .ls-quiz-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ls-check-btn {
+        padding: 11px 28px;
+        background: linear-gradient(135deg, var(--v6), var(--v4));
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 6px 20px rgba(168, 85, 247, .35);
+    }
+
+    .ls-check-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(168, 85, 247, .45);
+    }
+
+    .ls-check-btn:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .ls-retry-btn {
+        padding: 11px 22px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color .2s, color .2s;
+    }
+
+    .ls-retry-btn:hover {
+        border-color: var(--v4);
+        color: var(--v4);
+    }
+
+    .ls-result {
+        margin-top: 14px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        display: none;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ls-result.ok {
+        background: rgba(34, 197, 94, .1);
+        color: var(--green);
+        border: 1px solid rgba(34, 197, 94, .2);
+    }
+
+    .ls-result.err {
+        background: rgba(239, 68, 68, .1);
+        color: var(--red);
+        border: 1px solid rgba(239, 68, 68, .2);
+    }
+
+    /* ── Navigation ── */
+    .ls-nav {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+    }
+
+    @media(max-width:560px) {
+        .ls-nav {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ls-nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: var(--txt);
+        transition: border-color .2s, transform .2s;
+    }
+
+    .ls-nav-btn:hover {
+        border-color: var(--v4);
+        transform: translateY(-2px);
+        color: var(--txt);
+    }
+
+    .ls-nav-btn span {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .ls-nav-btn small {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .ls-nav-btn strong {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .ls-nav-next {
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .ls-nav-prev {
+        justify-content: flex-start;
+    }
+
+    .ls-nav-next-btn {
+        display: none;
+    }
+
+    .ls-nav-end {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+    }
+
+    .btn-finish {
+        padding: 14px 40px;
+        background: linear-gradient(135deg, var(--v6), var(--v4));
+        color: #fff;
+        border-radius: 50px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 8px 30px rgba(168, 85, 247, .4);
+        transition: transform .2s, box-shadow .2s;
+        display: none;
+    }
+
+    .btn-finish:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 40px rgba(168, 85, 247, .55);
+        color: #fff;
+    }
+</style>
+
+<div class="ls-wrap">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="ls-sidebar">
+        <span class="ls-sb-badge">Курс 1</span>
+        <h3 class="ls-sb-title">Основи бюджетування</h3>
+        <ul class="ls-sb-list">
+            <li class="active">
+                <a href="{% url 'lesson_budgeting_1' %}">
+                    <span class="ls-sb-num">1</span>Що таке бюджет і навіщо він потрібен
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'lesson_budgeting_2' %}">
+                    <span class="ls-sb-num">2</span>Правило 50/30/20
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'lesson_budgeting_3' %}">
+                    <span class="ls-sb-num">3</span>Відстеження витрат та інструменти
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'lesson_budgeting_4' %}">
+                    <span class="ls-sb-num">4</span>Як зберегти та примножити кошти
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="ls-main">
+
+        <!-- Breadcrumb -->
+        <nav class="ls-bc">
+            <a href="{% url 'courses' %}">Курси</a>
+            <span class="ls-bc-sep">›</span>
+            <a href="{% url 'courses' %}">Основи бюджетування</a>
+            <span class="ls-bc-sep">›</span>
+            <span>Урок 1</span>
+        </nav>
+
+        <!-- Hero -->
+        <div class="ls-hero">
+            <span class="ls-badge">Урок 1 з 4</span>
+            <h1 class="ls-title">Що таке бюджет і навіщо він потрібен</h1>
+            <div class="ls-meta">
+                <span class="ls-meta-item">⏱️ ~20 хв</span>
+                <span class="ls-meta-item">📹 Відео + теорія</span>
+                <span class="ls-meta-item">✏️ 3 тести</span>
+            </div>
+        </div>
+
+        <!-- VIDEO -->
+        <div>
+            <div class="ls-sec-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect x="1" y="5" width="15" height="14" rx="2" />
+                </svg>
+                Відео-урок
+            </div>
+            <div class="ls-video-wrap">
+                <iframe src="https://www.youtube.com/embed/UySfX5T9X3g?si=MbGrbJvYPwFBc9vQ" title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- LESSON CONTENT -->
+        <div>
+            <div class="ls-sec-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="17" y1="10" x2="3" y2="10" />
+                    <line x1="21" y1="6" x2="3" y2="6" />
+                    <line x1="21" y1="14" x2="3" y2="14" />
+                    <line x1="17" y1="18" x2="3" y2="18" />
+                </svg>
+                Матеріал уроку
+            </div>
+            <div class="ls-card">
+                <div class="ls-prose">
+                    <h2>Що таке особистий бюджет?</h2>
+                    <p>Бюджет — це фінансовий план, який допомагає вам контролювати, скільки грошей ви
+                        <strong>заробляєте</strong> та <strong>витрачаєте</strong> за певний проміжок часу. Це
+                        найпростіший і найефективніший інструмент для досягнення фінансових цілей.
+                    </p>
+                    <p>Більшість людей вважають, що бюджет — це про обмеження та відмову від задоволень. Насправді
+                        бюджет — це <strong>свобода</strong>. Коли ви знаєте, куди йдуть ваші гроші, ви самі вирішуєте,
+                        що для вас важливе.</p>
+
+                    <div class="ls-callout">
+                        <span class="ls-callout-icon">💡</span>
+                        <p class="ls-callout-text"><strong>Знаєте чи?</strong> Людина, яка веде бюджет, накопичує в
+                            середньому в 2.5 рази більше заощаджень протягом 5 років, ніж та, яка не стежить за
+                            витратами.</p>
+                    </div>
+
+                    <h2>З чого складається бюджет?</h2>
+                    <p>Будь-який бюджет включає два ключові елементи:</p>
+                    <ul>
+                        <li><strong>Доходи</strong> — зарплата, фріланс, оренда, дивіденди, будь-які надходження грошей
+                        </li>
+                        <li><strong>Витрати</strong> — оренда, їжа, транспорт, розваги, кредити тощо</li>
+                    </ul>
+                    <p>Різниця між доходами та витратами — це або <strong>профіцит</strong> (гроші залишились) або
+                        <strong>дефіцит</strong> (витратили більше ніж заробили).
+                    </p>
+
+                    <h2>Чому люди не ведуть бюджет?</h2>
+                    <p>Ось найпоширеніші відмовки, які заважають почати:</p>
+                    <ul>
+                        <li>«У мене й так мало грошей, нема чого планувати» — насправді, саме тому і треба!</li>
+                        <li>«Це надто складно» — сучасні застосунки вирішують цю проблему за хвилини</li>
+                        <li>«У мене немає часу» — ведення бюджету займає 10-15 хвилин на тиждень</li>
+                        <li>«Я і так знаю, куди йдуть гроші» — після того, як люди починають вести облік, вони зазвичай
+                            дивуються результатам</li>
+                    </ul>
+
+                    <h2>Перші кроки до свого бюджету</h2>
+                    <h3>Крок 1: Визначте свої доходи</h3>
+                    <p>Запишіть усі джерела надходжень за місяць. Включіть зарплату, підробітки, будь-які стабільні
+                        платежі на вашу користь.</p>
+                    <h3>Крок 2: Зафіксуйте всі витрати</h3>
+                    <p>Протягом одного місяця записуйте кожну витрату. Чек у кав'ярні, проїзд, підписка на стрімінг —
+                        все має значення.</p>
+                    <h3>Крок 3: Порахуйте різницю</h3>
+                    <p>Доходи мінус витрати = ваш фінансовий результат за місяць. Це відправна точка для змін.</p>
+
+                    <div class="ls-callout">
+                        <span class="ls-callout-icon">🎯</span>
+                        <p class="ls-callout-text"><strong>Мета цього курсу:</strong> навчити вас будувати особистий
+                            бюджет, дотримуватись його та поступово збільшувати заощадження — реалістично і без стресу.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZZES -->
+        <div>
+            <div class="ls-sec-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                Перевір себе — 3 тести
+            </div>
+            <div class="ls-quiz-wrap">
+
+                <!-- Quiz 1 -->
+                <div class="ls-quiz-card" id="quiz1">
+                    <div class="ls-quiz-num">Тест 1 з 3</div>
+                    <p class="ls-quiz-q">Що таке особистий бюджет?</p>
+                    <div class="ls-opts">
+                        <label class="ls-opt" data-q="1" data-val="a"><input type="radio" name="q1" value="a"><span
+                                class="ls-opt-letter">A</span><span class="ls-opt-text">Банківський рахунок для
+                                зберігання грошей</span></label>
+                        <label class="ls-opt" data-q="1" data-val="b"><input type="radio" name="q1" value="b"><span
+                                class="ls-opt-letter">B</span><span class="ls-opt-text">Фінансовий план, що контролює
+                                доходи та витрати</span></label>
+                        <label class="ls-opt" data-q="1" data-val="c"><input type="radio" name="q1" value="c"><span
+                                class="ls-opt-letter">C</span><span class="ls-opt-text">Щоденник особистих
+                                записів</span></label>
+                    </div>
+                    <div class="ls-quiz-actions">
+                        <button class="ls-check-btn" onclick="checkQ(1,'b')" id="btn1">Перевірити відповідь</button>
+                        <button class="ls-retry-btn" onclick="retryQ(1)" id="retry1" style="display:none">Спробувати
+                            знову</button>
+                    </div>
+                    <div class="ls-result" id="res1"></div>
+                </div>
+
+                <!-- Quiz 2 -->
+                <div class="ls-quiz-card" id="quiz2">
+                    <div class="ls-quiz-num">Тест 2 з 3</div>
+                    <p class="ls-quiz-q">Що означає "дефіцит бюджету"?</p>
+                    <div class="ls-opts">
+                        <label class="ls-opt" data-q="2" data-val="a"><input type="radio" name="q2" value="a"><span
+                                class="ls-opt-letter">A</span><span class="ls-opt-text">Витрати перевищують
+                                доходи</span></label>
+                        <label class="ls-opt" data-q="2" data-val="b"><input type="radio" name="q2" value="b"><span
+                                class="ls-opt-letter">B</span><span class="ls-opt-text">Доходи перевищують
+                                витрати</span></label>
+                        <label class="ls-opt" data-q="2" data-val="c"><input type="radio" name="q2" value="c"><span
+                                class="ls-opt-letter">C</span><span class="ls-opt-text">Відсутність банківського
+                                рахунку</span></label>
+                    </div>
+                    <div class="ls-quiz-actions">
+                        <button class="ls-check-btn" onclick="checkQ(2,'a')" id="btn2">Перевірити відповідь</button>
+                        <button class="ls-retry-btn" onclick="retryQ(2)" id="retry2" style="display:none">Спробувати
+                            знову</button>
+                    </div>
+                    <div class="ls-result" id="res2"></div>
+                </div>
+
+                <!-- Quiz 3 -->
+                <div class="ls-quiz-card" id="quiz3">
+                    <div class="ls-quiz-num">Тест 3 з 3</div>
+                    <p class="ls-quiz-q">Скільки часу займає щотижневе ведення бюджету?</p>
+                    <div class="ls-opts">
+                        <label class="ls-opt" data-q="3" data-val="a"><input type="radio" name="q3" value="a"><span
+                                class="ls-opt-letter">A</span><span class="ls-opt-text">Кілька годин на
+                                день</span></label>
+                        <label class="ls-opt" data-q="3" data-val="b"><input type="radio" name="q3" value="b"><span
+                                class="ls-opt-letter">B</span><span class="ls-opt-text">10–15 хвилин на
+                                тиждень</span></label>
+                        <label class="ls-opt" data-q="3" data-val="c"><input type="radio" name="q3" value="c"><span
+                                class="ls-opt-letter">C</span><span class="ls-opt-text">Не менше 1 години
+                                щодня</span></label>
+                    </div>
+                    <div class="ls-quiz-actions">
+                        <button class="ls-check-btn" onclick="checkQ(3,'b')" id="btn3">Перевірити відповідь</button>
+                        <button class="ls-retry-btn" onclick="retryQ(3)" id="retry3" style="display:none">Спробувати
+                            знову</button>
+                    </div>
+                    <div class="ls-result" id="res3"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="ls-nav">
+            <div></div>
+            <a href="{% url 'lesson_budgeting_2' %}" class="ls-nav-btn ls-nav-next ls-nav-next-btn" id="nextBtn">
+                <span>
+                    <small>Наступний урок</small>
+                    <strong>Правило 50/30/20</strong>
+                </span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </a>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const answered = { 1: false, 2: false, 3: false };
+    const correct = { 1: false, 2: false, 3: false };
+
+    document.querySelectorAll('.ls-opt').forEach(function (opt) {
+        opt.addEventListener('click', function () {
+            const q = this.dataset.q;
+            const siblings = document.querySelectorAll('[data-q="' + q + '"]');
+            siblings.forEach(function (s) { s.classList.remove('selected'); });
+            this.classList.add('selected');
+        });
+    });
+
+    function checkQ(n, correctVal) {
+        const chosen = document.querySelector('input[name="q' + n + '"]:checked');
+        if (!chosen) { showToast('Оберіть відповідь!', 'warning'); return; }
+
+        const val = chosen.value;
+        const opts = document.querySelectorAll('[data-q="' + n + '"]');
+        opts.forEach(function (o) {
+            if (o.dataset.val === correctVal) o.classList.add('correct');
+            else if (o.dataset.val === val) o.classList.add('wrong');
+            o.style.pointerEvents = 'none';
+        });
+        const res = document.getElementById('res' + n);
+        res.style.display = 'flex';
+        if (val === correctVal) {
+            res.className = 'ls-result ok';
+            res.innerHTML = '✅ Правильно! Чудова робота!';
+            correct[n] = true;
+        } else {
+            res.className = 'ls-result err';
+            res.innerHTML = '❌ Неправильно. Правильна відповідь виділена зеленим.';
+        }
+        document.getElementById('btn' + n).disabled = true;
+        document.getElementById('retry' + n).style.display = 'inline-block';
+        answered[n] = true;
+        checkAllDone();
+    }
+
+    function retryQ(n) {
+        const opts = document.querySelectorAll('[data-q="' + n + '"]');
+        opts.forEach(function (o) {
+            o.classList.remove('selected', 'correct', 'wrong');
+            o.style.pointerEvents = '';
+        });
+        document.querySelectorAll('input[name="q' + n + '"]').forEach(function (i) { i.checked = false; });
+        document.getElementById('res' + n).style.display = 'none';
+        document.getElementById('btn' + n).disabled = false;
+        document.getElementById('retry' + n).style.display = 'none';
+        answered[n] = false; correct[n] = false;
+    }
+
+    function checkAllDone() {
+        if (answered[1] && answered[2] && answered[3]) {
+            document.getElementById('nextBtn').style.display = 'flex';
+        }
+    }
+</script>
+{% endblock %}

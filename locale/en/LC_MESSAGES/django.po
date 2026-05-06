@@ -1,0 +1,179 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+# Base / navigation
+msgid "FinSmart - Система рекомендацій з фінансової грамотності"
+msgstr "FinSmart - Financial Literacy Recommendation System"
+
+msgid "Головна"
+msgstr "Home"
+
+msgid "Курси"
+msgstr "Courses"
+
+msgid "Про нас"
+msgstr "About"
+
+msgid "Контакти"
+msgstr "Contact"
+
+msgid "Перемикач теми"
+msgstr "Theme toggle"
+
+msgid "Змінити мову"
+msgstr "Change language"
+
+msgid "Українська"
+msgstr "Ukrainian"
+
+# Index
+msgid "Система рекомендацій з фінансової грамотності"
+msgstr "Financial Literacy Recommendation System"
+
+msgid "Персоналізована система для покращення ваших фінансових знань. Навчайтеся у зручний час та досягайте фінансової свободи!"
+msgstr "A personalized system to improve your financial knowledge. Learn at a convenient time and achieve financial freedom!"
+
+msgid "Почати навчання"
+msgstr "Start learning"
+
+msgid "Наші переваги"
+msgstr "Our advantages"
+
+msgid "Орієнтована на користувача"
+msgstr "User-focused"
+
+msgid "Оберіть курс, який підходить саме вам — за темою та складністю"
+msgstr "Choose the course that fits you best — by topic and difficulty"
+
+msgid "Безкоштовні матеріали"
+msgstr "Free materials"
+
+msgid "Доступ до якісних освітніх матеріалів без додаткових витрат"
+msgstr "Access quality learning materials at no extra cost"
+
+msgid "Зручна аналітика"
+msgstr "Convenient analytics"
+
+msgid "Відстежуйте свій прогрес та досягнення в особистому кабінеті"
+msgstr "Track your progress and achievements in your profile"
+
+msgid "Популярні курси"
+msgstr "Popular courses"
+
+# Courses
+msgid "Курси - FinSmart"
+msgstr "Courses - FinSmart"
+
+msgid "Наші курси"
+msgstr "Our courses"
+
+msgid "Оберіть курс, який підходить саме вам, та почніть свій шлях до фінансової грамотності"
+msgstr "Choose a course that suits you and start your journey to financial literacy"
+
+msgid "Пошук курсів..."
+msgstr "Search courses..."
+
+msgid "Всі курси"
+msgstr "All courses"
+
+msgid "Бюджетування"
+msgstr "Budgeting"
+
+msgid "Інвестиції"
+msgstr "Investing"
+
+msgid "Кредити"
+msgstr "Credit"
+
+msgid "Пенсії"
+msgstr "Pension"
+
+msgid "Наші Преміум Курси"
+msgstr "Our Premium Courses"
+
+# About
+msgid "Про нас - FinSmart"
+msgstr "About - FinSmart"
+
+msgid "Про FinSmart"
+msgstr "About FinSmart"
+
+msgid "Ми створюємо майбутнє фінансової грамотності в Україні"
+msgstr "We are building the future of financial literacy in Ukraine"
+
+msgid "Освітніх курсів"
+msgstr "Educational courses"
+
+msgid "Відгуків студентів"
+msgstr "Student reviews"
+
+msgid "Задоволених студентів"
+msgstr "Satisfied students"
+
+msgid "Наші цінності"
+msgstr "Our values"
+
+msgid "Якість"
+msgstr "Quality"
+
+msgid "Доступність"
+msgstr "Accessibility"
+
+# Contact
+msgid "Контакти - FinSmart"
+msgstr "Contact - FinSmart"
+
+msgid "Зв'яжіться з нами"
+msgstr "Contact us"
+
+msgid "Ми завжди раді відповісти на ваші запитання та допомогти вам"
+msgstr "We are always happy to answer your questions and help you"
+
+msgid "Контактна інформація"
+msgstr "Contact information"
+
+msgid "Заповніть форму або зв'яжіться з нами напряму"
+msgstr "Fill out the form or contact us directly"
+
+msgid "Телефон"
+msgstr "Phone"
+
+msgid "Адреса"
+msgstr "Address"
+
+# Login
+msgid "Вхід - FinSmart"
+msgstr "Sign in - FinSmart"
+
+msgid "Вхід"
+msgstr "Sign in"
+
+msgid "Невірний логін або пароль. Спробуйте ще раз."
+msgstr "Invalid login or password. Please try again."
+
+msgid "Логін або Email"
+msgstr "Username or Email"
+
+msgid "Пароль"
+msgstr "Password"
+
+msgid "Забули пароль?"
+msgstr "Forgot password?"
+
+msgid "УВІЙТИ"
+msgstr "SIGN IN"
+
+msgid "або"
+msgstr "or"
+
+msgid "Увійти через Google"
+msgstr "Sign in with Google"
+
+msgid "Ще не маєте акаунту?"
+msgstr "Don't have an account?"
+
+msgid "Зареєструватися"
+msgstr "Sign up"
+
