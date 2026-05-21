@@ -1182,7 +1182,17 @@ function copyShareLink() {
         const btn = document.getElementById('btn-cart-{{ course.id }}');
         if (!btn) return;
 
+        const isAuthenticated = document.body.dataset.authenticated === '1';
+        const authToastMsg = 'Увійдіть або зареєструйтесь, щоб додати курс до кошика';
+
         btn.addEventListener('click', function () {
+            if (!isAuthenticated) {
+                if (typeof showToast === 'function') {
+                    showToast(authToastMsg, 'warning');
+                }
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Додаємо...';
 
@@ -1195,8 +1205,8 @@ function copyShareLink() {
                 headers: { 'X-CSRFToken': csrfToken },
                 credentials: 'same-origin',
             })
-                .then(r => r.json())
-                .then(data => {
+                .then(r => r.json().then(data => ({ ok: r.ok, data })))
+                .then(({ ok, data }) => {
                     if (data.success) {
                         btn.textContent = '✓ Додано';
                         btn.className = 'btn-in-cart-hero';
@@ -1210,6 +1220,11 @@ function copyShareLink() {
 
                         setTimeout(() => { window.location.href = "{% url 'cart_detail' %}"; }, 700);
                     } else {
+                        if (data.requires_auth && typeof showToast === 'function') {
+                            showToast(data.message || authToastMsg, 'warning');
+                        } else if (typeof showToast === 'function') {
+                            showToast(data.message || 'Не вдалося додати курс до кошика', 'error');
+                        }
                         btn.disabled = false;
                         btn.textContent = '🛒 Додати в кошик';
                     }
@@ -1217,6 +1232,9 @@ function copyShareLink() {
                 .catch(() => {
                     btn.disabled = false;
                     btn.textContent = '🛒 Додати в кошик';
+                    if (typeof showToast === 'function') {
+                        showToast('Сталася помилка при додаванні до кошика', 'error');
+                    }
                 });
         });
     })();

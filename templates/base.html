@@ -20,7 +20,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body data-authenticated="{% if user.is_authenticated %}1{% else %}0{% endif %}">
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
 

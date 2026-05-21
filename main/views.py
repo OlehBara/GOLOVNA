@@ -614,6 +614,16 @@ def submit_review(request):
 def add_to_cart(request, course_id):
     """Додавання курсу в кошик (AJAX)"""
     try:
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "requires_auth": True,
+                    "message": "Увійдіть або зареєструйтесь, щоб додати курс до кошика",
+                },
+                status=401,
+            )
+
         course = Course.objects.get(id=course_id)
 
         # ── Guard: користувач вже має доступ — не додаємо в кошик ──
@@ -627,23 +637,10 @@ def add_to_cart(request, course_id):
                     }
                 )
 
-        if request.user.is_authenticated:
-            # Для авторизованих користувачів
-            cart_item, created = CartItem.objects.get_or_create(
-                user=request.user, course=course
-            )
-            count = CartItem.objects.filter(user=request.user).count()
-        else:
-            # Для анонімних користувачів (по сесії)
-            session_key = request.session.session_key
-            if not session_key:
-                request.session.create()
-                session_key = request.session.session_key
-
-            cart_item, created = CartItem.objects.get_or_create(
-                session_key=session_key, course=course
-            )
-            count = CartItem.objects.filter(session_key=session_key).count()
+        cart_item, created = CartItem.objects.get_or_create(
+            user=request.user, course=course
+        )
+        count = CartItem.objects.filter(user=request.user).count()
 
         return JsonResponse(
             {

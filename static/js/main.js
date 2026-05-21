@@ -284,6 +284,13 @@ function addToCart(arg1, arg2) {
         courseId = arg2;
     }
 
+    if (document.body.dataset.authenticated !== '1') {
+        if (typeof showToast === 'function') {
+            showToast('Увійдіть або зареєструйтесь, щоб додати курс до кошика', 'warning');
+        }
+        return;
+    }
+
     // Find the button by ID
     const btn = document.getElementById(`btn-add-${courseId}`);
     if (!btn) {
@@ -342,7 +349,9 @@ function addToCart(arg1, arg2) {
                 }, 2000);
 
             } else {
-                showToast('Помилка: ' + data.message, 'error');
+                const toastType = data.requires_auth ? 'warning' : 'error';
+                const toastMsg = data.message || 'Не вдалося додати курс до кошика';
+                showToast(data.requires_auth ? toastMsg : 'Помилка: ' + toastMsg, toastType);
 
                 btn.disabled = false;
                 btn.innerText = originalText;
