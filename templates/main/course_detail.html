@@ -883,8 +883,19 @@
                     </a>
                     {% endif %}
                 </div>
+                {% elif not course.is_premium %}
+                <!-- 🆓 Безкоштовний курс -->
+                <div class="cd-price-row">
+                    <div class="cd-price" style="font-size: 1.1rem; color: var(--qz-green, #22c55e);">Безкоштовно</div>
+                    <a href="{% url 'free_lesson' course.id %}"
+                       class="btn-buy js-start-free-course"
+                       data-course-id="{{ course.id }}"
+                       style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                        ▶ Почати
+                    </a>
+                </div>
                 {% else %}
-                <!-- ❌ Курс не куплений -->
+                <!-- 💳 Платний курс -->
                 <div class="cd-price-row">
                     <div class="cd-price">{{ course.price }}<span>UAH</span></div>
 
@@ -1182,14 +1193,8 @@ function copyShareLink() {
         const btn = document.getElementById('btn-cart-{{ course.id }}');
         if (!btn) return;
 
-        const isAuthenticated = document.body.dataset.authenticated === '1';
-        const authToastMsg = 'Увійдіть або зареєструйтесь, щоб додати курс до кошика';
-
         btn.addEventListener('click', function () {
-            if (!isAuthenticated) {
-                if (typeof showToast === 'function') {
-                    showToast(authToastMsg, 'warning');
-                }
+            if (typeof requireAuthToast === 'function' && !requireAuthToast()) {
                 return;
             }
 
@@ -1221,7 +1226,7 @@ function copyShareLink() {
                         setTimeout(() => { window.location.href = "{% url 'cart_detail' %}"; }, 700);
                     } else {
                         if (data.requires_auth && typeof showToast === 'function') {
-                            showToast(data.message || authToastMsg, 'warning');
+                            showToast(data.message || (typeof AUTH_REQUIRED_MSG !== 'undefined' ? AUTH_REQUIRED_MSG : 'Увійдіть або зареєструйтесь'), 'warning');
                         } else if (typeof showToast === 'function') {
                             showToast(data.message || 'Не вдалося додати курс до кошика', 'error');
                         }

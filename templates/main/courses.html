@@ -144,7 +144,7 @@
                     {% if course.is_premium %}
                     <a href="{% url 'course_detail' course.id %}" class="btn-secondary">Детальніше</a>
                     {% else %}
-                    <a href="{% url 'free_lesson' course.id %}" class="btn-secondary">Почати</a>
+                    <a href="{% url 'free_lesson' course.id %}" class="btn-secondary js-start-free-course" data-course-id="{{ course.id }}">Почати</a>
                     {% endif %}
                 </div>
             </div>

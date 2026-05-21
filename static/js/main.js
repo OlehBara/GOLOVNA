@@ -274,6 +274,38 @@ console.log('%cСтворено для кращої фінансової осв�
 
 
 // ============================================
+// Auth-gated actions (cart, free course start)
+// ============================================
+const AUTH_REQUIRED_MSG = 'Увійдіть або зареєструйтесь, щоб додати курс до кошика';
+
+function requireAuthToast() {
+    if (document.body.dataset.authenticated !== '1') {
+        if (typeof showToast === 'function') {
+            showToast(AUTH_REQUIRED_MSG, 'warning');
+        }
+        return false;
+    }
+    return true;
+}
+
+function startFreeCourse(courseId, event) {
+    if (event) {
+        event.preventDefault();
+    }
+    if (!requireAuthToast()) {
+        return;
+    }
+    window.location.href = `/course/${courseId}/free/`;
+}
+
+document.addEventListener('click', function (e) {
+    const startBtn = e.target.closest('.js-start-free-course');
+    if (startBtn) {
+        startFreeCourse(startBtn.dataset.courseId, e);
+    }
+});
+
+// ============================================
 // Shopping Cart Functionality
 // ============================================
 function addToCart(arg1, arg2) {
@@ -284,10 +316,7 @@ function addToCart(arg1, arg2) {
         courseId = arg2;
     }
 
-    if (document.body.dataset.authenticated !== '1') {
-        if (typeof showToast === 'function') {
-            showToast('Увійдіть або зареєструйтесь, щоб додати курс до кошика', 'warning');
-        }
+    if (!requireAuthToast()) {
         return;
     }
 
