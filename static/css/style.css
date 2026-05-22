@@ -1006,9 +1006,9 @@ body {
 
 .contact-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    max-width: 1000px;
+    grid-template-columns: 0.85fr 1.45fr;
+    gap: 48px;
+    max-width: 100%;
     margin: 0 auto;
 }
 

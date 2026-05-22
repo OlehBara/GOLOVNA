@@ -14,16 +14,12 @@ from .models import (
     SubscriptionPlan,
     UserSubscription,
 )
-
-
 admin.site.register(Course)
 admin.site.register(Review)
 admin.site.register(ContactMessage)
 admin.site.register(LessonProgress)
 admin.site.register(SubscriptionPlan)
 admin.site.register(UserSubscription)
-
-
 @admin.register(StudentVerification)
 class StudentVerificationAdmin(admin.ModelAdmin):
     list_display = ("user", "status", "submitted_at", "reviewed_at", "photo_thumbnail")
@@ -39,7 +35,6 @@ class StudentVerificationAdmin(admin.ModelAdmin):
             )
         return "–"
     photo_thumbnail.short_description = "Фото"
-
     def photo_preview(self, obj):
         if obj.document_photo:
             return format_html(
@@ -48,7 +43,6 @@ class StudentVerificationAdmin(admin.ModelAdmin):
             )
         return "–"
     photo_preview.short_description = "Попередній перегляд"
-
     def save_model(self, request, obj, form, change):
         if change and "status" in form.changed_data and obj.status in ("approved", "rejected"):
             from django.utils import timezone

@@ -179,6 +179,7 @@
         "Перейти до курсів": "Go to Courses",
         "Зв'яжіться з нами": "Contact Us",
         "Контакти": "Contacts",
+        "Звязок": "Contact",
         "Про нас": "About",
         "Про FinSmart": "About FinSmart",
         "Головна": "Home",

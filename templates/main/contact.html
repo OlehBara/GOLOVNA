@@ -168,6 +168,14 @@
 
 {% block extra_css %}
 <style>
+    .contact-section > .container {
+        max-width: 1360px;
+    }
+
+    .page-header {
+        padding: 28px 0 24px;
+    }
+
     .contact-chat-inline {
         border-radius: 20px;
         background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.96));
@@ -178,7 +186,8 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        height: 480px;
+        height: 560px;
+        min-height: 560px;
     }
     .contact-chat-header {
         padding: 14px 18px;
@@ -413,7 +422,10 @@
     [data-theme="light"] .contact-chat-login-text { color: #475569; }
 
     @media (max-width: 768px) {
-        .contact-chat-inline { height: 400px; }
+        .contact-chat-inline {
+            height: 480px;
+            min-height: 480px;
+        }
     }
 </style>
 {% endblock %}

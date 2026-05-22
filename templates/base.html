@@ -52,7 +52,7 @@
                     <a href="{% url 'about' %}"
                         class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">{% trans "Про нас" %}</a>
                     <a href="{% url 'contact' %}"
-                        class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">{% trans "Контакти" %}</a>
+                        class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">{% trans "Звязок" %}</a>
                 </nav>
 
                 <!-- Header Actions -->
@@ -177,7 +177,7 @@
             <a href="{% url 'about' %}"
                 class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">Про нас</a>
             <a href="{% url 'contact' %}"
-                class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Контакти</a>
+                class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Звязок</a>
 
             {% if not user.is_authenticated %}
             <a href="{% url 'register' %}" class="nav-link"

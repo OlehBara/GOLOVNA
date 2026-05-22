@@ -19,6 +19,9 @@ msgstr "About"
 msgid "Контакти"
 msgstr "Contact"
 
+msgid "Звязок"
+msgstr "Contact"
+
 msgid "Перемикач теми"
 msgstr "Theme toggle"
 
